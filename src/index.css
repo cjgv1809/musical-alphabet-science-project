@@ -1,0 +1,90 @@
+/* Sistema de diseño (tokens). Un solo lugar para colores, radios y
+ * focos: los módulos solo los consumen. Funciona offline (feria).
+ */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --bg: #eef1f7;
+  --ink: #1a2333;
+  --muted: #5b6577;
+  --card: #ffffff;
+  --border: #d9e0ec;
+  --field: #ffffff;
+
+  /* "Pantallas" oscuras (medidores, lienzos): iguales en ambos temas. */
+  --display: #141a2e;
+  --display-ink: #eef1ff;
+  --display-dim: #9aa3c0;
+
+  /* Acento por sección (conserva el código de color original). */
+  --accent-emit: #2f6db3;
+  --accent-listen: #14705c;
+  --accent-spec: #5b4bc4;
+  --accent-table: #7d6115;
+  --accent-edu: #6f4fa1;
+  --accent-inst: #9a5518;
+
+  --warn-bg: #fff4cf;
+  --warn-border: #8a6d1a;
+  --danger: #b3261e;
+  --danger-bg: #fde7e5;
+
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.07), 0 6px 20px rgba(16, 24, 40, 0.07);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1220;
+    --ink: #e9edf7;
+    --muted: #9aa3c0;
+    --card: #151c30;
+    --border: #2a3450;
+    --field: #1c2440;
+    --warn-bg: #3a2f10;
+    --danger-bg: #3d1512;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* Jerarquía de titulares coherente en todos los paneles. */
+section h2 {
+  font-size: 1.3rem;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+/* Foco visible en todo control (accesibilidad con teclado). */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--accent-emit);
+  outline-offset: 2px;
+}
+
+/* Respeta "reducir movimiento" del sistema. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
