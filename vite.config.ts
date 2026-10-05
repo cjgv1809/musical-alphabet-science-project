@@ -11,6 +11,9 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 // - test.setupFiles: carga matchers de jest-dom.
 // - test.globals: permite usar describe/it/expect sin importarlos.
 export default defineConfig({
+  // base relativa: el build funciona tanto en localhost como bajo el
+  // subpath de GitHub Pages (https://USUARIO.github.io/REPO/).
+  base: './',
   plugins: [react(), basicSsl()],
   test: {
     environment: 'jsdom',
