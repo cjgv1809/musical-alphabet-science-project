@@ -139,6 +139,13 @@
   opacity: 0.65;
 }
 
+/* Medidor fuera de la región viva: se lee a demanda, no se anuncia. */
+.snr {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .tabla {
   margin-top: 0.8rem;
   font-size: 0.9rem;

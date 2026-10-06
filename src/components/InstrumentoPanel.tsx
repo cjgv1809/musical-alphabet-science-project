@@ -183,7 +183,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
   return (
     <section className={estilos.panel} aria-labelledby="titulo-instrumento">
-      <h2 id="titulo-instrumento">De la guitarra a las palabras 🎸</h2>
+      <h2 id="titulo-instrumento">De la guitarra a las palabras <span aria-hidden="true">🎸</span></h2>
       <p className={estilos.ayuda}>
         Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…):
         toca la melodía aquí o con una guitarra/flauta/voz afinada, de una
@@ -213,7 +213,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
             onClick={() => void tocar()}
             disabled={mensaje.trim().length === 0}
           >
-            ▶ Tocar melodía
+            <span aria-hidden="true">▶</span> Tocar melodía
           </button>
         ) : (
           <button
@@ -223,16 +223,16 @@ export default function InstrumentoPanel(): React.JSX.Element {
               solicitarDetencionMelodia();
             }}
           >
-            ■ Detener
+            <span aria-hidden="true">■</span> Detener
           </button>
         )}
         {!escuchando ? (
           <button type="button" onClick={() => void empezarEscucha()}>
-            ● Escuchar melodía
+            <span aria-hidden="true">●</span> Escuchar melodía
           </button>
         ) : (
           <button type="button" onClick={detenerEscucha}>
-            ■ Dejar de escuchar
+            <span aria-hidden="true">■</span> Dejar de escuchar
           </button>
         )}
         <button
@@ -241,7 +241,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
           disabled={texto.length === 0}
           aria-label="Leer en voz alta el texto transcrito"
         >
-          🔊 Hablar
+          <span aria-hidden="true">🔊</span> Hablar
         </button>
         <button
           type="button"
@@ -254,7 +254,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
       {errorLocal !== null && (
         <p className={estilos.error} role="alert">
-          ⚠ {errorLocal}
+          <span aria-hidden="true">⚠</span> {errorLocal}
         </p>
       )}
 
@@ -276,24 +276,29 @@ export default function InstrumentoPanel(): React.JSX.Element {
           {texto.length === 0 ? (
             <span className={estilos.vacio}>
               {escuchando
-                ? `Escuchando… SNR ${nivel.snrDb.toFixed(0)} dB.`
+                ? 'Escuchando… toca notas cerca del micrófono.'
                 : 'Aquí aparecerá la melodía transcrita.'}
             </span>
           ) : (
             texto
           )}
         </div>
+        {escuchando && (
+          <p className={estilos.snr}>
+            Señal/ruido: <strong>{nivel.snrDb.toFixed(0)} dB</strong>
+          </p>
+        )}
       </div>
 
       {fraseDetectada !== null && (
         <p className={estilos.fraseReconocida} role="status">
-          ✅ Frase reconocida: <strong>{fraseDetectada}</strong>
+          <span aria-hidden="true">✅</span> Frase reconocida: <strong>{fraseDetectada}</strong>
         </p>
       )}
 
       {confuso && fraseDetectada === null && (
         <p className={estilos.aviso} role="status">
-          🎸 Se oye sonido pero ninguna nota clara: toca de a{' '}
+          <span aria-hidden="true">🎸</span> Se oye sonido pero ninguna nota clara: toca de a{' '}
           <strong>una sola cuerda</strong> por vez, despacio y cerca del
           micro. Los acordes rasgueados no se leen (suenan varias notas a
           la vez).

@@ -13,7 +13,7 @@
   --ink: #1a2333;
   --muted: #5b6577;
   --card: #ffffff;
-  --border: #d9e0ec;
+  --border: #6f7f99; /* ≥3:1 sobre card/field (WCAG 1.4.11) */
   --field: #ffffff;
 
   /* "Pantallas" oscuras (medidores, lienzos): iguales en ambos temas. */
@@ -43,7 +43,7 @@
     --ink: #e9edf7;
     --muted: #9aa3c0;
     --card: #151c30;
-    --border: #2a3450;
+    --border: #5f6f99; /* ≥3:1 sobre card/field (WCAG 1.4.11) */
     --field: #1c2440;
     --warn-bg: #3a2f10;
     --danger-bg: #3d1512;

@@ -10,7 +10,7 @@ export default function App(): React.JSX.Element {
   return (
     <div className={estilos.pagina}>
       <header className={estilos.cabecera}>
-        <h1 className={estilos.titulo}>Notas que hablan 🎸</h1>
+        <h1 className={estilos.titulo}>Notas que hablan <span aria-hidden="true">🎸</span></h1>
         <p className={estilos.subtitulo}>
           Toca una melodía con la guitarra y la app la convierte en palabras
           y voz · Proyecto de Física (Acústica) accesible
