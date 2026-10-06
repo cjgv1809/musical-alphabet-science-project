@@ -4,20 +4,23 @@ import {
   obtenerFrecuenciaNota,
   obtenerNombreNota,
 } from '../audio/cromatico.ts';
+import { FRASES_ESENCIALES, buscarFrase, normalizarFrase } from '../audio/frases.ts';
 import {
   solicitarDetencionMelodia,
   tocarMelodia,
 } from '../audio/instrumento.ts';
 import { DetectorMelodia } from '../audio/melodia.ts';
+import { callar, hablar, hayVoz } from '../audio/voz.ts';
 import { motorEscucha } from '../audio/escucha.ts';
-import { useAppStore } from '../store/useAppStore.ts';
+import type { NivelSenal } from '../types/index.ts';
 import estilos from './InstrumentoPanel.module.css';
 
 /**
- * Panel del modo instrumento (prototipo): una nota musical por letra.
- * - "Tocar melodía": el emisor sintetizado (seno puro) toca el texto.
- * - "Escuchar melodía": transcribe lo que suene: el propio emisor,
- *   una guitarra, una flauta o tu voz (una nota cada vez, afinada).
+ * Panel principal: de la guitarra a las palabras (modo accesible).
+ * - "Tocar melodía": el emisor sintetizado toca el texto.
+ * - "Escuchar melodía": transcribe guitarra/flauta/voz (una nota afinada).
+ * - Fraseario: si lo transcrito equivale a una frase esencial, se muestra
+ *   en grande y se HABLA en voz alta. Botón Hablar para texto libre.
  */
 export default function InstrumentoPanel(): React.JSX.Element {
   const [mensaje, setMensaje] = useState('HOLA');
@@ -25,9 +28,26 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const [escuchando, setEscuchando] = useState(false);
   const [notaActual, setNotaActual] = useState<string | null>(null);
   const [texto, setTexto] = useState('');
+  const [fraseDetectada, setFraseDetectada] = useState<string | null>(null);
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
-  const nivel = useAppStore((e) => e.nivel);
+  const [nivel, setNivel] = useState<NivelSenal>({ senal: 0, ruido: 0, snrDb: 0 });
   const detencionRef = useRef(false);
+  const ultimoHabladoRef = useRef('');
+
+  // Fraseario: si lo transcrito equivale a una frase esencial, se habla.
+  // (Se compara sin espacios: la guitarra no los emite.)
+  useEffect(() => {
+    const frase = buscarFrase(texto);
+    setFraseDetectada(frase);
+    if (frase !== null && ultimoHabladoRef.current !== texto) {
+      ultimoHabladoRef.current = texto;
+      if (!hablar(frase) && !hayVoz()) {
+        setErrorLocal(
+          'Este navegador no tiene voz sintetizada: la frase se muestra pero no suena.',
+        );
+      }
+    }
+  }, [texto]);
 
   useEffect(() => {
     return () => {
@@ -67,9 +87,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       await motorEscucha.iniciar(
         {
           alConfirmar: (simbolo) => setTexto((t) => t + simbolo),
-          alNivel: (nuevoNivel) => {
-            useAppStore.getState().fijarNivel(nuevoNivel);
-          },
+          alNivel: (nuevoNivel) => setNivel(nuevoNivel),
         },
         new DetectorMelodia(),
       );
@@ -84,16 +102,38 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const detenerEscucha = (): void => {
     motorEscucha.detener();
     setEscuchando(false);
-    useAppStore.getState().fijarNivel({ senal: 0, ruido: 0, snrDb: 0 });
+    setNivel({ senal: 0, ruido: 0, snrDb: 0 });
   };
+
+  const limpiarTexto = (): void => {
+    setTexto('');
+    setFraseDetectada(null);
+    ultimoHabladoRef.current = '';
+    callar();
+  };
+
+  const hablarTexto = (): void => {
+    if (!hablar(fraseDetectada ?? texto)) {
+      setErrorLocal(
+        'Este navegador no tiene voz sintetizada: lee el texto en pantalla.',
+      );
+    }
+  };
+
+  /** Secuencia de notas de una frase (para aprenderla en la guitarra). */
+  const notasDe = (frase: string): string =>
+    [...normalizarFrase(frase)]
+      .map((c) => obtenerNombreNota(c) ?? '?')
+      .join(' · ');
 
   return (
     <section className={estilos.panel} aria-labelledby="titulo-instrumento">
-      <h2 id="titulo-instrumento">Modo instrumento (prototipo) 🎸</h2>
+      <h2 id="titulo-instrumento">De la guitarra a las palabras 🎸</h2>
       <p className={estilos.ayuda}>
         Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…):
         toca la melodía aquí o con una guitarra/flauta/voz afinada, de una
-        nota cada vez. Espacio = silencio. Sin dígitos (prototipo).
+        nota cada vez. Si completas una frase esencial, la app la dice en voz
+        alta. Espacio = silencio.
       </p>
 
       <label className={estilos.etiqueta} htmlFor="campo-melodia">
@@ -142,7 +182,15 @@ export default function InstrumentoPanel(): React.JSX.Element {
         )}
         <button
           type="button"
-          onClick={() => setTexto('')}
+          onClick={hablarTexto}
+          disabled={texto.length === 0}
+          aria-label="Leer en voz alta el texto transcrito"
+        >
+          🔊 Hablar
+        </button>
+        <button
+          type="button"
+          onClick={limpiarTexto}
           disabled={texto.length === 0}
         >
           Limpiar
@@ -183,6 +231,36 @@ export default function InstrumentoPanel(): React.JSX.Element {
           )}
         </div>
       </div>
+
+      {fraseDetectada !== null && (
+        <p className={estilos.fraseReconocida} role="status">
+          ✅ Frase reconocida: <strong>{fraseDetectada}</strong>
+        </p>
+      )}
+
+      <details className={estilos.tabla}>
+        <summary>Frases rápidas (se hablan solas al deletrearlas)</summary>
+        <div className={estilos.frasesGrid}>
+          {FRASES_ESENCIALES.map((frase) => (
+            <button
+              key={frase.texto}
+              type="button"
+              className={estilos.fraseBtn}
+              onClick={() => {
+                if (!hablar(frase.texto)) {
+                  setErrorLocal(
+                    'Este navegador no tiene voz sintetizada.',
+                  );
+                }
+              }}
+              aria-label={`Decir en voz alta: ${frase.texto}. Notas: ${notasDe(frase.texto)}`}
+            >
+              <span>{frase.texto}</span>
+              <small>{notasDe(frase.texto)}</small>
+            </button>
+          ))}
+        </div>
+      </details>
 
       <details className={estilos.tabla}>
         <summary>Ver las 26 notas (para afinar la guitarra)</summary>

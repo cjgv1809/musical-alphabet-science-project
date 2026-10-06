@@ -165,3 +165,48 @@
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
+
+.fraseReconocida {
+  margin-top: 0.8rem;
+  font-size: 1.4rem;
+  background: #e6f4ec;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .fraseReconocida {
+    background: #123324;
+  }
+}
+
+.frasesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.fraseBtn {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: flex-start;
+  text-align: left;
+  font-size: 1.05rem;
+  font-weight: 800;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent);
+  background: var(--field);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.fraseBtn small {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.75;
+}
