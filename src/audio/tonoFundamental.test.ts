@@ -56,6 +56,20 @@ describe('tonoFundamental (YIN simplificado)', () => {
     }
   });
 
+  it('el registro grave de los signos (155–208 Hz) también se estima', () => {
+    for (const f of [155.56, 196.0, 207.65]) {
+      const seno = estimarFrecuenciaFundamental(sintetizar(f), SAMPLE_RATE);
+      expect(Math.abs((seno?.frecuencia ?? 0) - f) / f).toBeLessThan(0.02);
+      const guitarra = estimarFrecuenciaFundamental(
+        sintetizar(f, GUITARRA),
+        SAMPLE_RATE,
+      );
+      expect(
+        Math.abs((guitarra?.frecuencia ?? 0) - f) / f,
+      ).toBeLessThan(0.03);
+    }
+  });
+
   it('silencio y ruido no inventan tonos', () => {
     expect(
       estimarFrecuenciaFundamental(new Float32Array(N), SAMPLE_RATE),

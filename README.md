@@ -23,14 +23,14 @@ en voz alta**.
 npm install
 npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
-npm run test     # tests unitarios (Vitest, 20 tests)
+npm run test     # tests unitarios (Vitest, 23 tests)
 npm run typecheck # TypeScript estricto
 npm run build    # compilación de producción
 ```
 
 ## Cómo usarla
 
-1. **Tocar melodía** 🎹: escribe el mensaje (solo A–Z) y pulsa *Tocar
+1. **Tocar melodía** 🎹: escribe el mensaje (A–Z y signos . , ? ! ¿ ¡) y pulsa *Tocar
    melodía*. Cada letra suena 500 ms como un seno puro en su nota
    cromática; la nota actual se muestra en grande con su nombre y Hz.
 2. **Escuchar melodía** 🎧: pulsa *Escuchar melodía* y toca las notas con
@@ -98,6 +98,20 @@ npm run build    # compilación de producción
 | `K` | SOL4 | 392.00 | `X` | SOL#5 | 830.61 |
 | `L` | SOL#4 | 415.30 | `Y` | LA5 | 880.00 |
 | `M` | LA4 | 440.00 | `Z` | LA#5 | 932.33 |
+
+**Signos de puntuación** (grave, posiciones fáciles: cuerdas al aire y
+trastes 1–7). Cada signo vale como **nota sola o como acorde con ese
+bajo** —el detector oye la fundamental, que en un acorde bien tocado es
+el bajo— (ej. `.` = SOL3: cuerda SOL al aire o un SOL mayor abierto):
+
+| Signo | Nota (bajo) | Hz |
+|---|---|---|
+| `.` | RE#3 | 155.56 |
+| `,` | MI3 | 164.81 |
+| `?` | FA3 | 174.61 |
+| `!` | FA#3 | 185.00 |
+| `¿` | SOL3 | 196.00 |
+| `¡` | SOL#3 | 207.65 |
 
 ## Arquitectura
 

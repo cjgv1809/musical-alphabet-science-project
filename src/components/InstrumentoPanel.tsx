@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   SIMBOLOS_CROMATICOS,
+  SIMBOLOS_PUNTUACION,
   obtenerFrecuenciaNota,
   obtenerNombreNota,
 } from '../audio/cromatico.ts';
@@ -155,7 +156,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       </p>
 
       <label className={estilos.etiqueta} htmlFor="campo-melodia">
-        Mensaje (solo A–Z)
+        Mensaje (A–Z y signos . , ? ! ¿ ¡)
       </label>
       <input
         id="campo-melodia"
@@ -281,7 +282,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       </details>
 
       <details className={estilos.tabla}>
-        <summary>Ver las 26 notas (para afinar la guitarra)</summary>
+        <summary>Ver las 26 notas + 6 signos (para afinar la guitarra)</summary>
         <table>
           <thead>
             <tr>
@@ -292,6 +293,13 @@ export default function InstrumentoPanel(): React.JSX.Element {
           </thead>
           <tbody>
             {SIMBOLOS_CROMATICOS.map((s) => (
+              <tr key={s}>
+                <td>{s}</td>
+                <td>{obtenerNombreNota(s)}</td>
+                <td>{obtenerFrecuenciaNota(s)}</td>
+              </tr>
+            ))}
+            {SIMBOLOS_PUNTUACION.map((s) => (
               <tr key={s}>
                 <td>{s}</td>
                 <td>{obtenerNombreNota(s)}</td>

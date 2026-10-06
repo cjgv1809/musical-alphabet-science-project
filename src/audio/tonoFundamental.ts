@@ -33,7 +33,7 @@ const RMS_MINIMO = 0.01;
 export function estimarFrecuenciaFundamental(
   muestras: Float32Array,
   sampleRate: number,
-  freqMin = 150,
+  freqMin = 120,
   freqMax = 1500,
 ): EstimacionTono | null {
   const n = muestras.length;

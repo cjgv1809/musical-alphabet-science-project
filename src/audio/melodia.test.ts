@@ -103,6 +103,12 @@ describe('melodia (instrumento → texto)', () => {
     );
   });
 
+  it('"HOLA." con timbre de guitarra incluye el punto (nota grave)', () => {
+    expect(transcribir(sintetizarMelodia('HOLA.', 500, 60, GUITARRA))).toBe(
+      'HOLA.',
+    );
+  });
+
   it('un punteo breve (30 ms) no confirma', () => {
     const senal = sintetizarMelodia('E', 30, 200, GUITARRA);
     expect(transcribir(senal)).toBe('');

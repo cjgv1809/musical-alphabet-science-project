@@ -13,9 +13,13 @@
  *   Todo el rango se toca en la guitarra entre cuerdas al aire y
  *   traste ~18, y cae en la banda limpia de 300–3000 Hz (casi todo;
  *   solo LA3/LA#3 rozan por debajo, sin problema).
- * - Espacio = SILENCIO (una pausa larga). Dígitos y signos no incluidos
- *   en el prototipo (se deletrean o se omiten): 26 notas ya exigen
- *   afinar bien, y cada símbolo extra acerca los semitonos al oído.
+ * - Signos (`. , ? ! ¿ ¡`): 6 semitonos POR DEBAJO de LA3 (155–208 Hz),
+ *   todos en posiciones fáciles (cuerdas al aire y trastes 1–7).
+ *   Cada signo se puede tocar como NOTA SOLA o como ACORDE con ese
+ *   bajo: el detector oye la fundamental (≈ el bajo) en ambos casos.
+ *   Ej. `.` = SOL3: vale la cuerda SOL al aire o un SOL mayor abierto.
+ * - Espacio = SILENCIO (una pausa larga). Dígitos no incluidos en el
+ *   prototipo (se deletrean o se omiten).
  *
  * Física: en temperamento igual cada semitono multiplica por 2^(1/12)
  * (≈ 1.0595, un 6 % más agudo). El oído tolera ±45 cents (casi medio
@@ -30,6 +34,17 @@ export const SIMBOLOS_CROMATICOS: readonly string[] = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 ] as const;
+
+/**
+ * Signos de puntuación, de grave a agudo (índices −6…−1):
+ * `.` = RE#3, `,` = MI3, `?` = FA3, `!` = FA#3, `¿` = SOL3, `¡` = SOL#3.
+ */
+export const SIMBOLOS_PUNTUACION: readonly string[] = [
+  '.', ',', '?', '!', '¿', '¡',
+] as const;
+
+/** Índice cromático más grave (RE#3). Las letras usan 0…25. */
+export const INDICE_MINIMO = -6;
 
 /** Desafinación máxima aceptada, en cents (100 cents = 1 semitono). */
 export const TOLERANCIA_CENTS = 45;
@@ -48,8 +63,9 @@ export function frecuenciaSemitono(indice: number): number {
 
 /** Nombre musical del semitono n.º i (ej. 0 → "LA3", 3 → "DO4"). */
 export function nombreNota(indice: number): string {
-  const nombre = NOMBRES_SEMITONO[indice % 12] ?? '?';
-  // La octava cambia al llegar a DO (índice 3, 15, …).
+  // Módulo positivo: también vale para índices negativos (signos).
+  const nombre = NOMBRES_SEMITONO[((indice % 12) + 12) % 12] ?? '?';
+  // La octava cambia al llegar a DO (índices …, −9, 3, 15, …).
   const octava = 3 + Math.floor((indice + 9) / 12);
   return `${nombre}${octava}`;
 }
@@ -61,33 +77,48 @@ export function centsEntre(f1: number, f2: number): number {
 }
 
 /**
- * Normaliza un carácter del modo instrumento: mayúsculas; el espacio
- * se conserva como silencio. El resto → `null` (sin nota).
+ * Normaliza un carácter del modo instrumento: mayúsculas y signos tal
+ * cual; el espacio se conserva como silencio. El resto → `null`.
  */
 export function normalizarSimboloCromatico(caracter: string): string | null {
   if (caracter.length === 0) return null;
   if (caracter === ' ') return ' ';
+  if ((SIMBOLOS_PUNTUACION as readonly string[]).includes(caracter)) {
+    return caracter;
+  }
   const mayuscula = caracter.toUpperCase();
   return (SIMBOLOS_CROMATICOS as readonly string[]).includes(mayuscula)
     ? mayuscula
     : null;
 }
 
-/** Frecuencia exacta (Hz) de una letra, o `null` (espacio/letra ajena). */
+/**
+ * Índice cromático de un símbolo normalizado: letras 0…25,
+ * signos −6…−1. El espacio no tiene altura (se trata aparte).
+ */
+function indiceDe(simbolo: string): number | null {
+  const indiceLetra = SIMBOLOS_CROMATICOS.indexOf(simbolo);
+  if (indiceLetra >= 0) return indiceLetra;
+  const indiceSigno = SIMBOLOS_PUNTUACION.indexOf(simbolo);
+  if (indiceSigno >= 0) return indiceSigno + INDICE_MINIMO;
+  return null;
+}
+
+/** Frecuencia exacta (Hz) de una letra o signo, o `null` (espacio/ajeno). */
 export function obtenerFrecuenciaNota(simbolo: string): number | null {
   const normalizado = normalizarSimboloCromatico(simbolo);
   if (normalizado === null || normalizado === ' ') return null;
-  const indice = SIMBOLOS_CROMATICOS.indexOf(normalizado);
-  if (indice < 0) return null;
+  const indice = indiceDe(normalizado);
+  if (indice === null) return null;
   return frecuenciaSemitono(indice);
 }
 
-/** Nombre musical de una letra (ej. 'H' → "MI4"), o `null`. */
+/** Nombre musical de una letra o signo (ej. 'H' → "MI4"), o `null`. */
 export function obtenerNombreNota(simbolo: string): string | null {
   const normalizado = normalizarSimboloCromatico(simbolo);
   if (normalizado === null || normalizado === ' ') return null;
-  const indice = SIMBOLOS_CROMATICOS.indexOf(normalizado);
-  if (indice < 0) return null;
+  const indice = indiceDe(normalizado);
+  if (indice === null) return null;
   return nombreNota(indice);
 }
 
@@ -98,9 +129,9 @@ export interface NotaCercana {
 }
 
 /**
- * Dada una frecuencia medida, devuelve la letra más cercana si cae
- * dentro de la tolerancia (±45 cents). Fuera de rango o demasiado
- * desafinada → `null` (no inventamos letras).
+ * Dada una frecuencia medida, devuelve la letra o signo más cercano
+ * si cae dentro de la tolerancia (±45 cents). Fuera de rango o
+ * demasiado desafinada → `null` (no inventamos símbolos).
  */
 export function notaMasCercana(
   frecuencia: number,
@@ -110,9 +141,14 @@ export function notaMasCercana(
   const flotante =
     12 * Math.log2(frecuencia / FRECUENCIA_BASE_CROMATICA);
   const indice = Math.round(flotante);
-  if (indice < 0 || indice >= SIMBOLOS_CROMATICOS.length) return null;
-  const simbolo = SIMBOLOS_CROMATICOS[indice];
-  if (simbolo === undefined) return null;
+  if (indice < INDICE_MINIMO || indice >= SIMBOLOS_CROMATICOS.length) {
+    return null;
+  }
+  const simbolo =
+    indice < 0
+      ? (SIMBOLOS_PUNTUACION[indice - INDICE_MINIMO] ?? null)
+      : (SIMBOLOS_CROMATICOS[indice] ?? null);
+  if (simbolo === null) return null;
   const cents = centsEntre(frecuencia, frecuenciaSemitono(indice));
   if (Math.abs(cents) > toleranciaCents) return null;
   return { simbolo, cents };

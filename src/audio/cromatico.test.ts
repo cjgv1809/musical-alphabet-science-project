@@ -59,4 +59,18 @@ describe('cromatico (una nota por letra)', () => {
     expect(centsEntre(440, 220)).toBeCloseTo(1200); // una octava
     expect(centsEntre(220 * Math.pow(2, 1 / 12), 220)).toBeCloseTo(100);
   });
+
+  it('los 6 signos viven por debajo de LA3 con nombres correctos', () => {
+    expect(obtenerFrecuenciaNota('.')).toBeCloseTo(155.56, 1); // RE#3
+    expect(obtenerNombreNota('.')).toBe('RE#3');
+    expect(obtenerFrecuenciaNota(',')).toBeCloseTo(164.81, 1); // MI3
+    expect(obtenerFrecuenciaNota('?')).toBeCloseTo(174.61, 1); // FA3
+    expect(obtenerFrecuenciaNota('!')).toBeCloseTo(185.0, 1); // FA#3
+    expect(obtenerFrecuenciaNota('¿')).toBeCloseTo(196.0, 1); // SOL3
+    expect(obtenerNombreNota('¿')).toBe('SOL3');
+    expect(obtenerFrecuenciaNota('¡')).toBeCloseTo(207.65, 1); // SOL#3
+    // Redondeo inverso: 196 Hz exactos → ¿ (SOL3).
+    expect(notaMasCercana(196)?.simbolo).toBe('¿');
+    expect(notaMasCercana(155.56)?.simbolo).toBe('.');
+  });
 });
