@@ -152,7 +152,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
         Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…):
         toca la melodía aquí o con una guitarra/flauta/voz afinada, de una
         nota cada vez. Si completas una frase esencial, la app la dice en voz
-        alta. Espacio = silencio.
+        alta. Espacio = cuerda RE al aire (146.83 Hz).
       </p>
 
       <label className={estilos.etiqueta} htmlFor="campo-melodia">
@@ -228,12 +228,10 @@ export default function InstrumentoPanel(): React.JSX.Element {
             <span className={estilos.apagado}>—</span>
           ) : (
             <span className={estilos.nota}>
-              {notaActual === ' ' ? '␣' : notaActual}
+              {notaActual === ' ' ? '␣ ESPACIO' : notaActual}
               <small>
                 {' '}
-                {notaActual === ' '
-                  ? '(silencio)'
-                  : `(${obtenerNombreNota(notaActual) ?? ''} · ${obtenerFrecuenciaNota(notaActual) ?? ''} Hz)`}
+                {`(${obtenerNombreNota(notaActual) ?? ''} · ${obtenerFrecuenciaNota(notaActual) ?? ''} Hz)`}
               </small>
             </span>
           )}
@@ -282,7 +280,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       </details>
 
       <details className={estilos.tabla}>
-        <summary>Ver las 26 notas + 6 signos (para afinar la guitarra)</summary>
+        <summary>Ver notas, signos y espacio (para afinar la guitarra)</summary>
         <table>
           <thead>
             <tr>
@@ -306,6 +304,11 @@ export default function InstrumentoPanel(): React.JSX.Element {
                 <td>{obtenerFrecuenciaNota(s)}</td>
               </tr>
             ))}
+            <tr key="espacio">
+              <td>␣ ESPACIO</td>
+              <td>{obtenerNombreNota(' ')}</td>
+              <td>{obtenerFrecuenciaNota(' ')}</td>
+            </tr>
           </tbody>
         </table>
       </details>

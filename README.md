@@ -23,7 +23,7 @@ en voz alta**.
 npm install
 npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
-npm run test     # tests unitarios (Vitest, 23 tests)
+npm run test     # tests unitarios (Vitest, 25 tests)
 npm run typecheck # TypeScript estricto
 npm run build    # compilación de producción
 ```
@@ -112,6 +112,10 @@ el bajo— (ej. `.` = SOL3: cuerda SOL al aire o un SOL mayor abierto):
 | `!` | FA#3 | 185.00 |
 | `¿` | SOL3 | 196.00 |
 | `¡` | SOL#3 | 207.65 |
+
+**Espacio = RE3 (146.83 Hz, cuerda RE al aire).** El silencio no se oye,
+así que el espacio tiene nota propia; sin ella las palabras se pegaban
+("HOLACOMO"). Es la nota más fácil de la guitarra.
 
 ## Arquitectura
 

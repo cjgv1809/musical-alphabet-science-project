@@ -113,12 +113,9 @@ export async function tocarMelodia(
         continue;
       }
       alIniciarNota?.(simbolo, indiceVisible);
-      if (simbolo === ' ') {
-        // Silencio de palabra: nota + pausa extra (se oye el hueco).
-        await esperarMs(duracionMs + pausaMs);
-      } else {
-        await tocarNota(simbolo, duracionMs);
-      }
+      // El espacio también suena (RE3, cuerda al aire): así las palabras
+      // no se pegan. El silencio entre notas lo pone la pausa posterior.
+      await tocarNota(simbolo, duracionMs);
       if (detenido()) break;
       await esperarMs(pausaMs);
       indiceVisible += 1;

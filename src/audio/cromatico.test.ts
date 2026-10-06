@@ -32,12 +32,17 @@ describe('cromatico (una nota por letra)', () => {
     expect(frecuenciaSemitono(12)).toBeCloseTo(440, 1); // LA4 = 440 Hz
   });
 
-  it('normaliza minúsculas, conserva el espacio y rechaza lo demás', () => {
+  it('normaliza minúsculas y rechaza caracteres no soportados', () => {
     expect(normalizarSimboloCromatico('h')).toBe('H');
-    expect(normalizarSimboloCromatico(' ')).toBe(' ');
-    expect(obtenerFrecuenciaNota(' ')).toBe(null); // silencio, sin tono
     expect(normalizarSimboloCromatico('5')).toBe(null);
     expect(normalizarSimboloCromatico('ñ')).toBe(null);
+  });
+
+  it('el espacio es RE3 (146.83 Hz, cuerda RE al aire)', () => {
+    expect(normalizarSimboloCromatico(' ')).toBe(' ');
+    expect(obtenerFrecuenciaNota(' ')).toBeCloseTo(146.83, 1);
+    expect(obtenerNombreNota(' ')).toBe('RE3');
+    expect(notaMasCercana(146.83)?.simbolo).toBe(' ');
   });
 
   it('notaMasCercana tolera ±30 cents y elige la vecina si cae más cerca', () => {

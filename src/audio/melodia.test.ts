@@ -47,10 +47,7 @@ function sintetizarMelodia(
   for (const caracter of mensaje) {
     const simbolo = normalizarSimboloCromatico(caracter);
     if (simbolo === null) continue;
-    if (simbolo === ' ') {
-      trozos.push(new Float32Array(Math.round((duracionMs + pausaMs) * porMs)));
-      continue;
-    }
+    // Espacio incluido: ahora tiene nota propia (RE3), se toca igual.
     const frecuencia = obtenerFrecuenciaNota(simbolo) ?? 0;
     trozos.push(
       sintetizarNota(frecuencia, Math.round(duracionMs * porMs), armonicos),
@@ -106,6 +103,12 @@ describe('melodia (instrumento → texto)', () => {
   it('"HOLA." con timbre de guitarra incluye el punto (nota grave)', () => {
     expect(transcribir(sintetizarMelodia('HOLA.', 500, 60, GUITARRA))).toBe(
       'HOLA.',
+    );
+  });
+
+  it('"HOLA COMO" con timbre de guitarra conserva el espacio', () => {
+    expect(transcribir(sintetizarMelodia('HOLA COMO', 500, 60, GUITARRA))).toBe(
+      'HOLA COMO',
     );
   });
 
