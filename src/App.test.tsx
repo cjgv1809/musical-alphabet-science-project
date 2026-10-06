@@ -3,33 +3,24 @@ import { render, screen } from '@testing-library/react';
 import App from './App.tsx';
 
 /**
- * Tests de humo de la UI: verifican que todos los paneles
- * se montan sin romper nada. La lógica de audio ya está cubierta
- * por los tests de `src/audio/`; aquí solo integramos.
+ * Test de humo de la UI: verifica que la app monta el panel de
+ * guitarra a palabras. La lógica de audio está cubierta por los
+ * tests de `src/audio/`; aquí solo integramos.
  */
 describe('App (integración)', () => {
-  it('monta todos los paneles', () => {
+  it('monta el título y el panel de guitarra a palabras', () => {
     render(<App />);
     expect(
-      screen.getByRole('heading', { name: /alfabeto musical tocado/i }),
+      screen.getByRole('heading', { name: /notas que hablan/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: /codificar y tocar/i }),
+      screen.getByRole('heading', { name: /de la guitarra a las palabras/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: /escuchar y decodificar/i }),
+      screen.getByRole('button', { name: /tocar melodía/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: /espectro en vivo/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: /alfabeto de notas/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: /física del proyecto/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: /modo instrumento/i }),
+      screen.getByRole('button', { name: /escuchar melodía/i }),
     ).toBeInTheDocument();
   });
 });

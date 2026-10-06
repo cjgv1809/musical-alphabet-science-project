@@ -1,20 +1,16 @@
 import { TAMANO_VENTANA } from '../utils/constants.ts';
 import type { NivelSenal } from '../types/index.ts';
-import {
-  DecodificadorSuavizado,
-  analizarVentana,
-  type AnalisisVentana,
-} from './decoder.ts';
 import { calcularSnrDb, crearCadenaAntiRuido } from './noiseFilter.ts';
-import type { DetectorDeSimbolos } from './melodia.ts';
+import { DetectorMelodia, type DetectorDeSimbolos } from './melodia.ts';
 
 /**
- * Motor de escucha: micrófono → filtro pasa-banda → Goertzel en vivo.
+ * Motor de escucha: micrófono → filtro pasa-banda → detector en vivo.
  *
  * Cómo funciona (cadena de audio):
  *   micrófono → pasa-altas 300 Hz → pasa-bajas 3000 Hz → AnalyserNode
  * Cada 40 ms copiamos una ventana de muestras en el dominio del tiempo
- * y la pasamos por `DecodificadorSuavizado` (ver `decoder.ts`).
+ * y la pasamos por el detector (`DetectorMelodia`: estima la fundamental
+ * y la redondea a la letra más cercana).
  * El mismo AnalyserNode lo lee `SpectrumVisualizer` para dibujar.
  *
  * El medidor de nivel es APROXIMADO (RMS de la ventana + seguidor de
@@ -27,8 +23,6 @@ export interface CallbacksEscucha {
   alConfirmar: (simbolo: string, snrDb: number) => void;
   /** Se llama en cada ventana con el nivel aproximado (para el medidor). */
   alNivel: (nivel: NivelSenal) => void;
-  /** Foto cruda de cada ventana (opcional: panel de diagnóstico). */
-  alDebug?: (analisis: AnalisisVentana, sampleRate: number) => void;
 }
 
 /** Traduce errores técnicos del micrófono a mensajes para estudiantes. */
@@ -66,11 +60,10 @@ export class MotorEscucha {
   private bufferTiempo: Float32Array | null = null;
   private intervaloId = 0;
   /**
-   * Detector intercambiable: DTMF (`DecodificadorSuavizado`) o melodía
-   * (`DetectorMelodia`). Ambos cumplen `DetectorDeSimbolos`, así que el
-   * motor no distingue: solo pide `procesar(ventana) → símbolo o null`.
+   * Detector intercambiable (por defecto, melodía cromática).
+   * El motor no distingue: solo pide `procesar(ventana) → símbolo o null`.
    */
-  private detector: DetectorDeSimbolos = new DecodificadorSuavizado();
+  private detector: DetectorDeSimbolos = new DetectorMelodia();
   private callbacks: CallbacksEscucha | null = null;
   private ruidoBase = 0.02;
   private activo = false;
@@ -90,7 +83,7 @@ export class MotorEscucha {
 
   async iniciar(
     callbacks: CallbacksEscucha,
-    detector: DetectorDeSimbolos = new DecodificadorSuavizado(),
+    detector: DetectorDeSimbolos = new DetectorMelodia(),
   ): Promise<void> {
     if (this.activo) return;
     if (
@@ -197,15 +190,6 @@ export class MotorEscucha {
     );
     if (resultado !== null) {
       this.callbacks.alConfirmar(resultado.simbolo, resultado.snrDb);
-    }
-
-    // Diagnóstico: la foto cruda (sin suavizado) para ver en la UI
-    // qué frecuencias están llegando realmente al micrófono.
-    if (this.callbacks.alDebug !== undefined) {
-      const analisis = analizarVentana(ventana, this.obtenerSampleRate());
-      if (analisis !== null) {
-        this.callbacks.alDebug(analisis, this.obtenerSampleRate());
-      }
     }
   }
 
