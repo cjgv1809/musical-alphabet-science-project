@@ -1,5 +1,5 @@
 .panel {
-  --accent: var(--accent-inst);
+  --accent: var(--accent-listen);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -8,34 +8,9 @@
 }
 
 .ayuda {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
   font-size: 0.95rem;
   color: var(--muted);
-}
-
-.etiqueta {
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.texto {
-  display: block;
-  margin: 0.25rem 0 0.75rem;
-  padding: 0.45rem 0.6rem;
-  min-height: 44px;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid var(--border);
-  background: var(--field);
-  color: var(--ink);
-  font-size: 1.1rem;
-  width: 100%;
-  max-width: 22rem;
-  text-transform: uppercase;
-}
-
-.texto:focus {
-  border-color: var(--accent);
-  outline: none;
 }
 
 .botones {
@@ -68,7 +43,7 @@
   cursor: not-allowed;
 }
 
-.tocar {
+.escuchar {
   background: var(--accent) !important;
   border-color: var(--accent) !important;
   color: white !important;
@@ -83,46 +58,48 @@
   margin-top: 0.75rem;
 }
 
-.doble {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
+.medidor {
   margin-top: 0.8rem;
-}
-
-@media (max-width: 640px) {
-  .doble {
-    grid-template-columns: 1fr;
-  }
-}
-
-.ahoraSuena {
-  min-height: 3.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
   background: var(--display);
+  color: var(--display-ink);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
 }
 
-.apagado {
-  color: var(--display-dim);
-  font-size: 1.5rem;
+.barraFila {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
 }
 
-.nota {
-  color: #ffd166;
-  font-size: 1.6rem;
-  font-weight: 800;
+.barra {
+  height: 0.8rem;
+  background: #39415e;
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-.nota small {
-  font-size: 0.85rem;
-  font-weight: 400;
+.rellenoSenal {
+  height: 100%;
+  background: #35b59c;
+}
+
+.rellenoRuido {
+  height: 100%;
+  background: #e76f51;
+}
+
+.snr {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
 }
 
 .resultado {
-  min-height: 3.4rem;
+  margin-top: 0.8rem;
+  min-height: 3.5rem;
   border: 1.5px dashed var(--accent);
   border-radius: var(--radius-sm);
   padding: 0.6rem 0.7rem;
@@ -139,12 +116,15 @@
   opacity: 0.65;
 }
 
-.tabla {
+.diagnostico {
   margin-top: 0.8rem;
   font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.7rem;
 }
 
-.tabla summary {
+.diagnostico summary {
   cursor: pointer;
   font-weight: 700;
   min-height: 44px;
@@ -152,16 +132,8 @@
   align-items: center;
 }
 
-.tabla table {
-  width: 100%;
-  max-width: 24rem;
-  border-collapse: collapse;
-  margin-top: 0.4rem;
-}
-
-.tabla th,
-.tabla td {
-  padding: 0.3rem 0.5rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
+.pista {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
 }

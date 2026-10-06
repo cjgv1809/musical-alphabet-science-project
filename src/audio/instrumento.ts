@@ -3,35 +3,21 @@ import {
   normalizarSimboloCromatico,
   obtenerFrecuenciaNota,
 } from './cromatico.ts';
+import { asegurarAudioListo, esperarMs } from './toneGenerator.ts';
 import {
   DURACION_SIMBOLO_MS,
   PAUSA_ENTRE_SIMBOLOS_MS,
 } from '../utils/constants.ts';
 
 /**
- * Desbloquea el audio del navegador. Los navegadores exigen un gesto
- * del usuario (clic) antes de sonar: hay que llamar a esto desde un
- * botón. Sin esto, Tone.js queda en silencio.
- */
-export async function asegurarAudioListo(): Promise<void> {
-  await Tone.start();
-}
-
-/** Pausa asíncrona entre notas. */
-function esperarMs(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
-
-/**
- * Emisor de melodías: UNA nota por letra.
+ * Emisor de melodías (modo instrumento): UNA nota por letra.
  *
- * Suena un solo oscilador senoidal en la frecuencia cromática de la
- * letra. ¿Por qué seno puro y no "sonido de guitarra"? Porque primero
- * validamos la CADENA (emisor → aire → detector) con la señal más
- * limpia posible; la robustez ante timbres reales (guitarra) la
- * demuestra el detector en `melodia.test.ts` con armónicos sintéticos.
+ * A diferencia del modo DTMF (dos senos por letra), aquí suena un solo
+ * oscilador senoidal en la frecuencia cromática de la letra. ¿Por qué
+ * seno puro y no "sonido de guitarra"? Porque primero validamos la
+ * CADENA (emisor → aire → detector) con la señal más limpia posible;
+ * la robustez ante timbres reales (guitarra) la demuestra el detector
+ * en `melodia.test.ts` con armónicos sintéticos.
  */
 
 export interface OpcionesTocarMelodia {

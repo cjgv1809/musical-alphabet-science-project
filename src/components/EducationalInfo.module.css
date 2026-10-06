@@ -1,0 +1,32 @@
+.panel {
+  --accent: var(--accent-edu);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--shadow), inset 0 4px 0 var(--accent);
+}
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.6rem;
+}
+
+.tarjetas article {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  background: var(--field);
+}
+
+.tarjetas h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.tarjetas p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}

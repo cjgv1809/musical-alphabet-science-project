@@ -27,6 +27,21 @@ export const VENTANAS_CONSECUTIVAS = 2;
 // El ruido se mide en frecuencias "vacías" (no usadas por el mapeo).
 export const FACTOR_UMBRAL = 3;
 
+// Umbral mínimo absoluto (magnitud Goertzel): aunque el aula esté en
+// silencio total (ruido ≈ 0), no aceptamos nada por debajo de esto.
+// Calibrado para N=1024 y tonos de amplitud ~0.5 (magnitud útil ≈ 250).
+export const UMBRAL_MINIMO = 8;
+
+// Margen mínimo para ganar el grupo: la mejor nota debe sonar al menos
+// el DOBLE que su rival más cercana. Así un altavoz con graves flojos
+// sigue valiendo mientras su nota sea la más clara de su grupo.
+export const MARGEN_GRUPO_MINIMO = 2;
+
+// Desequilibrio máximo entre los dos tonos del par ("twist"): 8×.
+// Red de seguridad relajada (antes 4×): los altavoces pequeños atenúan
+// los graves y un límite estricto rechazaba letras reales (H, L, A…).
+export const TWIST_MAXIMO = 8;
+
 // Duración de cada símbolo al "tocar" (ms): fija, sin control de velocidad.
 // 500 ms dan margen de sobra al decodificador (confirma en ~80 ms).
 export const DURACION_SIMBOLO_MS = 500;

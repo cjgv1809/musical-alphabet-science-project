@@ -1,10 +1,30 @@
 /**
- * Tipos compartidos de la WebApp (guitarra → palabras).
+ * Tipos compartidos de la WebApp "Alfabeto Musical Tocado".
  *
- * Convención de idioma:
- * - Español cuando es natural (textoTranscrito, fraseDetectada).
- * - Inglés para términos técnicos estándar (sampleRate, snrDb).
+ * Convención de idioma (pedida en el proyecto):
+ * - Español cuando es natural (tocarMensaje, textoDecodificado).
+ * - Inglés para términos técnicos estándar (sampleRate, magnitude, frequency).
  */
+
+/** Símbolo transmisible: letra, número o signo soportado por el mapeo. */
+export type Simbolo = string;
+
+/** Par de frecuencias (Hz) que codifica un símbolo, estilo DTMF. */
+export interface ParFrecuencias {
+  /** Frecuencia baja del par (grupo de filas). */
+  fBaja: number;
+  /** Frecuencia alta del par (grupo de columnas). */
+  fAlta: number;
+}
+
+/** Entrada del alfabeto: símbolo visible + su par de frecuencias. */
+export interface EntradaAlfabeto {
+  simbolo: Simbolo;
+  frecuencias: ParFrecuencias;
+}
+
+/** Estado del motor de audio (Tone.js / Web Audio API). */
+export type EstadoAudio = 'inactivo' | 'tocando' | 'escuchando' | 'error';
 
 /** Nivel de señal medido para el indicador señal/ruido. */
 export interface NivelSenal {
