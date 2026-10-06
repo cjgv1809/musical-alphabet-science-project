@@ -4,7 +4,7 @@ import {
   buscarFrase,
   normalizarFrase,
 } from './frases.ts';
-import { elegirVozEspanola } from './voz.ts';
+import { elegirVozEspanola, textoParaVoz } from './voz.ts';
 import { normalizarSimboloCromatico } from './cromatico.ts';
 
 /**
@@ -45,5 +45,16 @@ describe('voz (elección de voz española)', () => {
     expect(elegirVozEspanola(voces.slice(0, 2))).toBe(1);
     expect(elegirVozEspanola([voces[0] as { lang: string; name: string }])).toBe(-1);
     expect(elegirVozEspanola([])).toBe(-1);
+  });
+
+  it('textoParaVoz evita que "NO" se lea como "noroeste"', () => {
+    expect(textoParaVoz('NO')).toBe('No');
+    expect(textoParaVoz('ME DUELE')).toBe('Me Duele');
+    expect(textoParaVoz('SÍ')).toBe('Sí');
+    expect(textoParaVoz('HOLA.')).toBe('Hola.');
+    expect(textoParaVoz('¿CÓMO ESTÁS?')).toBe('¿Cómo Estás?');
+    // Minúsculas y letras sueltas no se tocan.
+    expect(textoParaVoz('hola')).toBe('hola');
+    expect(textoParaVoz('A')).toBe('A');
   });
 });

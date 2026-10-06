@@ -34,6 +34,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const [nivel, setNivel] = useState<NivelSenal>({ senal: 0, ruido: 0, snrDb: 0 });
   const detencionRef = useRef(false);
+  /** El micro no transcribe mientras la app habla o toca (anti-eco). */
+  const pausaTranscripcionRef = useRef(false);
+  const finVozTimerRef = useRef(0);
   const ultimoHabladoRef = useRef('');
 
   // Fraseario: si lo transcrito equivale a una frase esencial, se habla.
@@ -43,7 +46,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
     setFraseDetectada(frase);
     if (frase !== null && ultimoHabladoRef.current !== texto) {
       ultimoHabladoRef.current = texto;
-      if (!hablar(frase) && !hayVoz()) {
+      if (!hablarConPausa(frase) && !hayVoz()) {
         setErrorLocal(
           'Este navegador no tiene voz sintetizada: la frase se muestra pero no suena.',
         );
@@ -55,14 +58,38 @@ export default function InstrumentoPanel(): React.JSX.Element {
     return () => {
       detencionRef.current = true;
       solicitarDetencionMelodia();
+      window.clearTimeout(finVozTimerRef.current);
+      callar();
     };
   }, []);
+
+  /**
+   * Habla pausando la transcripción: sin esto, el micrófono oye el
+   * propio altavoz (la frase hablada) y aparecen letras fantasma.
+   * Se reanuda al terminar la voz, con temporizador de seguridad por
+   * si el evento de fin no llega en algún navegador.
+   */
+  const hablarConPausa = (textoVoz: string): boolean => {
+    pausaTranscripcionRef.current = true;
+    window.clearTimeout(finVozTimerRef.current);
+    const liberar = (): void => {
+      pausaTranscripcionRef.current = false;
+    };
+    const ok = hablar(textoVoz, liberar);
+    finVozTimerRef.current = window.setTimeout(
+      liberar,
+      Math.min(9000, 1200 + textoVoz.length * 150),
+    );
+    return ok;
+  };
 
   const tocar = async (): Promise<void> => {
     if (tocando || mensaje.trim().length === 0) return;
     detencionRef.current = false;
     setTocando(true);
     setErrorLocal(null);
+    // El micro no debe transcribir lo que toca el propio altavoz.
+    pausaTranscripcionRef.current = true;
     try {
       await tocarMelodia(mensaje, {
         alIniciarNota: (simbolo) => setNotaActual(simbolo),
@@ -73,6 +100,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
     } finally {
       setTocando(false);
       setNotaActual(null);
+      pausaTranscripcionRef.current = false;
     }
   };
 
@@ -82,7 +110,11 @@ export default function InstrumentoPanel(): React.JSX.Element {
     try {
       await motorEscucha.iniciar(
         {
-          alConfirmar: (simbolo) => setTexto((t) => t + simbolo),
+          alConfirmar: (simbolo) => {
+            // Ignora lo que suena mientras la app habla o toca.
+            if (pausaTranscripcionRef.current) return;
+            setTexto((t) => t + simbolo);
+          },
           alNivel: (nuevoNivel) => setNivel(nuevoNivel),
         },
         new DetectorMelodia(),
@@ -132,7 +164,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   };
 
   const hablarTexto = (): void => {
-    if (!hablar(fraseDetectada ?? texto)) {
+    if (!hablarConPausa(fraseDetectada ?? texto)) {
       setErrorLocal(
         'Este navegador no tiene voz sintetizada: lee el texto en pantalla.',
       );
@@ -264,7 +296,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
               type="button"
               className={estilos.fraseBtn}
               onClick={() => {
-                if (!hablar(frase.texto)) {
+                if (!hablarConPausa(frase.texto)) {
                   setErrorLocal(
                     'Este navegador no tiene voz sintetizada.',
                   );

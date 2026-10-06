@@ -23,7 +23,7 @@ en voz alta**.
 npm install
 npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
-npm run test     # tests unitarios (Vitest, 25 tests)
+npm run test     # tests unitarios (Vitest, 26 tests)
 npm run typecheck # TypeScript estricto
 npm run build    # compilación de producción
 ```
@@ -41,7 +41,8 @@ npm run build    # compilación de producción
    grande y suena en voz alta. El botón 🔊 Hablar lee cualquier texto, y
    la parrilla de frases las dice al pulsarlas (cada una muestra sus
    notas para aprenderla). La guitarra no emite espacios: "MEDUELE" vale
-   por "ME DUELE".
+   por "ME DUELE". Mientras la app habla o toca, pausa la transcripción
+   para no oírse a sí misma por el micrófono.
 4. **Tabla de 26 notas**: A = LA3 (220 Hz) … Z = LA#5 (932 Hz), con Hz y
    nombres para afinar con afinador.
 
