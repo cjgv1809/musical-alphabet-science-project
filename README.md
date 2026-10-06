@@ -64,6 +64,9 @@ npm run build    # compilación de producción
    Si no, sube el volumen y acerca a 20–50 cm.
 3. **¿Afinación?** Cada nota debe caer a ±45 cents de su objetivo (casi medio
    semitono). Usa un afinador para comprobar tu emisión.
+4. **¿Saliste de la app y ya no oye?** Los móviles suspenden el audio en
+   segundo plano; al volver, la app reanuda sola. Si no revive, pulsa
+   *Dejar de escuchar* y *Escuchar melodía* de nuevo.
 
 ## La física en 4 ideas
 

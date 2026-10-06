@@ -193,6 +193,28 @@ export class MotorEscucha {
     }
   }
 
+  /**
+   * Reanuda tras una suspensión del sistema (el móvil congela el audio
+   * al ocultar la app/pestaña). Devuelve true si el motor sigue vivo.
+   * Si el contexto murió del todo (iOS lo cierra a veces), devuelve
+   * false para que la UI reinicie la escucha desde cero.
+   */
+  async reanudar(): Promise<boolean> {
+    if (!this.activo || this.contexto === null) return false;
+    if (this.contexto.state === 'suspended') {
+      try {
+        await this.contexto.resume();
+      } catch {
+        return false;
+      }
+    }
+    if (this.contexto.state !== 'running') return false;
+    if (this.intervaloId === 0) {
+      this.intervaloId = window.setInterval(() => this.leerVentana(), 40);
+    }
+    return true;
+  }
+
   detener(): void {
     window.clearInterval(this.intervaloId);
     this.intervaloId = 0;

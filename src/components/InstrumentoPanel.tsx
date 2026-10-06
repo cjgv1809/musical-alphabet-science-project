@@ -6,6 +6,7 @@ import {
 } from '../audio/cromatico.ts';
 import { FRASES_ESENCIALES, buscarFrase, normalizarFrase } from '../audio/frases.ts';
 import {
+  asegurarAudioListo,
   solicitarDetencionMelodia,
   tocarMelodia,
 } from '../audio/instrumento.ts';
@@ -75,13 +76,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   };
 
   const empezarEscucha = async (): Promise<void> => {
-    if (escuchando) return;
-    if (motorEscucha.estaActivo()) {
-      setErrorLocal(
-        'Ya hay una escucha activa en el otro panel. Detenla primero.',
-      );
-      return;
-    }
+    if (motorEscucha.estaActivo()) return;
     setErrorLocal(null);
     try {
       await motorEscucha.iniciar(
@@ -104,6 +99,29 @@ export default function InstrumentoPanel(): React.JSX.Element {
     setEscuchando(false);
     setNivel({ senal: 0, ruido: 0, snrDb: 0 });
   };
+
+  // Los móviles suspenden el audio al ocultar la app: al volver a ella,
+  // se reanudan los contextos y, si el motor no revive, la escucha se
+  // reinicia sola (sin pulsar nada).
+  useEffect(() => {
+    const alVolver = (): void => {
+      if (document.hidden) return;
+      // Emisor: despierta el contexto de Tone.js.
+      void asegurarAudioListo().catch(() => undefined);
+      // Receptor: solo si estaba escuchando.
+      if (!motorEscucha.estaActivo()) return;
+      void (async () => {
+        const vive = await motorEscucha.reanudar();
+        if (!vive) {
+          motorEscucha.detener();
+          setEscuchando(false);
+          await empezarEscucha();
+        }
+      })().catch(() => undefined);
+    };
+    document.addEventListener('visibilitychange', alVolver);
+    return () => document.removeEventListener('visibilitychange', alVolver);
+  }, []);
 
   const limpiarTexto = (): void => {
     setTexto('');
