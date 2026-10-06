@@ -23,7 +23,7 @@ en voz alta**.
 npm install
 npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
-npm run test     # tests unitarios (Vitest, 26 tests)
+npm run test     # tests unitarios (Vitest, 28 tests)
 npm run typecheck # TypeScript estricto
 npm run build    # compilación de producción
 ```
@@ -57,7 +57,7 @@ npm run build    # compilación de producción
 4. Listo: un aparato *toca* y el otro *escucha*. Sin guitarra: silba o
    tararea notas sostenidas, o usa un generador de tonos (440 Hz = M).
 
-## Si no transcribe (diagnóstico en 3 pasos) 🔧
+## Si no transcribe (diagnóstico en 5 pasos) 🔧
 
 1. **¿Llega sonido al micro?** Con *Escuchar melodía* activo, aplaude cerca
    del móvil: la SNR debe moverse. Si no, revisa permiso de micro y HTTPS.
@@ -68,6 +68,10 @@ npm run build    # compilación de producción
 4. **¿Saliste de la app y ya no oye?** Los móviles suspenden el audio en
    segundo plano; al volver, la app reanuda sola. Si no revive, pulsa
    *Dejar de escuchar* y *Escuchar melodía* de nuevo.
+5. **¿Rasgueas acordes o tocas muy rápido?** La app es monofónica (como una
+   flauta): una sola cuerda por vez, sostenida ~0.5 s, con pequeña pausa
+   entre notas. Un acorde simultáneo no da letras falsas —da silencio— y
+   la app te avisa para que toques de a una cuerda.
 
 ## La física en 4 ideas
 
@@ -101,9 +105,10 @@ npm run build    # compilación de producción
 | `M` | LA4 | 440.00 | `Z` | LA#5 | 932.33 |
 
 **Signos de puntuación** (grave, posiciones fáciles: cuerdas al aire y
-trastes 1–7). Cada signo vale como **nota sola o como acorde con ese
-bajo** —el detector oye la fundamental, que en un acorde bien tocado es
-el bajo— (ej. `.` = SOL3: cuerda SOL al aire o un SOL mayor abierto):
+trastes 1–7). Se tocan como **nota sola** (ej. `.` = cuerda SOL al aire).
+Ojo probado en laboratorio: un acorde rasgueado simultáneo NO se lee
+(el detector monofónico no ve tono claro y la app avisa); si quieres
+arpegiar, hazlo lento cuerda por cuerda o apaga las demás con la palma:
 
 | Signo | Nota (bajo) | Hz |
 |---|---|---|

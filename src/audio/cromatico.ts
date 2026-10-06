@@ -15,9 +15,10 @@
  *   solo LA3/LA#3 rozan por debajo, sin problema).
  * - Signos (`. , ? ! ¿ ¡`): 6 semitonos POR DEBAJO de LA3 (155–208 Hz),
  *   todos en posiciones fáciles (cuerdas al aire y trastes 1–7).
- *   Cada signo se puede tocar como NOTA SOLA o como ACORDE con ese
- *   bajo: el detector oye la fundamental (≈ el bajo) en ambos casos.
- *   Ej. `.` = SOL3: vale la cuerda SOL al aire o un SOL mayor abierto.
+ *   Se tocan como NOTA SOLA, de a una cuerda por vez: un acorde
+ *   rasgueado simultáneo no se lee (varias notas a la vez confunden al
+ *   detector monofónico; probado en laboratorio: da silencio, no letras
+ *   falsas). Arpegiar lento cuerda por cuerda sí funciona (es melodía).
  * - Espacio = RE3 (146.83 Hz, cuerda RE al aire, índice −7): el silencio
  *   no se oye, así que el espacio necesitaba nota propia; sin ella las
  *   palabras se pegaban ("HOLACOMO"). Es la nota más fácil de tocar.

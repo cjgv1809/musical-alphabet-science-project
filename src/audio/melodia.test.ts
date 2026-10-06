@@ -64,6 +64,44 @@ function sintetizarMelodia(
   return senal;
 }
 
+/** Acorde simultáneo con timbre de cuerda (tónica + tercera + quinta). */
+function sintetizarAcorde(
+  frecuencias: readonly number[],
+  duracionMs: number,
+): Float32Array {
+  const n = Math.round((duracionMs * SAMPLE_RATE) / 1000);
+  const parciales = [1, 0.5, 0.25, 0.12];
+  const muestras = new Float32Array(n);
+  for (let i = 0; i < n; i += 1) {
+    let valor = 0;
+    for (const f of frecuencias) {
+      for (let k = 0; k < parciales.length; k += 1) {
+        valor +=
+          (parciales[k] ?? 0) *
+          Math.sin((2 * Math.PI * f * (k + 1) * i) / SAMPLE_RATE);
+      }
+    }
+    muestras[i] = (0.3 * valor) / frecuencias.length;
+  }
+  return muestras;
+}
+
+/** Procesa una señal ventana a ventana como el motor en vivo. */
+function procesarVentanas(
+  det: DetectorMelodia,
+  senal: Float32Array,
+): void {
+  const paso = Math.round((TICK_MS * SAMPLE_RATE) / 1000);
+  for (
+    let offset = 0;
+    offset + TAMANO_VENTANA <= senal.length;
+    offset += paso
+  ) {
+    const ventana = senal.slice(offset, offset + TAMANO_VENTANA);
+    det.procesar(ventana, SAMPLE_RATE, (offset / SAMPLE_RATE) * 1000);
+  }
+}
+/** Transcribe acumulando símbolos (atajo para los tests E2E). */
 function transcribir(senal: Float32Array): string {
   const detector = new DetectorMelodia();
   const paso = Math.round((TICK_MS * SAMPLE_RATE) / 1000);
@@ -115,5 +153,28 @@ describe('melodia (instrumento → texto)', () => {
   it('un punteo breve (30 ms) no confirma', () => {
     const senal = sintetizarMelodia('E', 30, 200, GUITARRA);
     expect(transcribir(senal)).toBe('');
+  });
+
+  it('un acorde simultáneo avisa confusión en vez de inventar letras', () => {
+    // Tríada FA# mayor con timbre de cuerda: el YIN no ve tono claro
+    // (probado en laboratorio) → ninguna letra + aviso de confusión.
+    const det = new DetectorMelodia();
+    procesarVentanas(det, sintetizarAcorde([185, 233.08, 277.18], 600));
+    expect(det.leerConfusion()).toBe(true);
+    // Tras avisar, el aviso se consume (no spamea).
+    expect(det.leerConfusion()).toBe(false);
+  });
+
+  it('el silencio y una nota clara no generan aviso de confusión', () => {
+    const detSilencio = new DetectorMelodia();
+    procesarVentanas(
+      detSilencio,
+      new Float32Array(Math.round((600 * SAMPLE_RATE) / 1000)),
+    );
+    expect(detSilencio.leerConfusion()).toBe(false);
+
+    const detNota = new DetectorMelodia();
+    procesarVentanas(detNota, sintetizarMelodia('A', 500, 60));
+    expect(detNota.leerConfusion()).toBe(false);
   });
 });

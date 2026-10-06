@@ -31,6 +31,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const [notaActual, setNotaActual] = useState<string | null>(null);
   const [texto, setTexto] = useState('');
   const [fraseDetectada, setFraseDetectada] = useState<string | null>(null);
+  const [confuso, setConfuso] = useState(false);
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   const [nivel, setNivel] = useState<NivelSenal>({ senal: 0, ruido: 0, snrDb: 0 });
   const detencionRef = useRef(false);
@@ -113,6 +114,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
           alConfirmar: (simbolo) => {
             // Ignora lo que suena mientras la app habla o toca.
             if (pausaTranscripcionRef.current) return;
+            setConfuso(false);
             setTexto((t) => t + simbolo);
           },
           alNivel: (nuevoNivel) => setNivel(nuevoNivel),
@@ -130,6 +132,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const detenerEscucha = (): void => {
     motorEscucha.detener();
     setEscuchando(false);
+    setConfuso(false);
     setNivel({ senal: 0, ruido: 0, snrDb: 0 });
   };
 
@@ -158,6 +161,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
   const limpiarTexto = (): void => {
     setTexto('');
+    setConfuso(false);
     setFraseDetectada(null);
     ultimoHabladoRef.current = '';
     callar();
@@ -284,6 +288,15 @@ export default function InstrumentoPanel(): React.JSX.Element {
       {fraseDetectada !== null && (
         <p className={estilos.fraseReconocida} role="status">
           ✅ Frase reconocida: <strong>{fraseDetectada}</strong>
+        </p>
+      )}
+
+      {confuso && fraseDetectada === null && (
+        <p className={estilos.aviso} role="status">
+          🎸 Se oye sonido pero ninguna nota clara: toca de a{' '}
+          <strong>una sola cuerda</strong> por vez, despacio y cerca del
+          micro. Los acordes rasgueados no se leen (suenan varias notas a
+          la vez).
         </p>
       )}
 

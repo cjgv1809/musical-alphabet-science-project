@@ -23,6 +23,8 @@ export interface CallbacksEscucha {
   alConfirmar: (simbolo: string, snrDb: number) => void;
   /** Se llama en cada ventana con el nivel aproximado (para el medidor). */
   alNivel: (nivel: NivelSenal) => void;
+  /** Sonido fuerte sin nota clara (opcional: sugerir una sola cuerda). */
+  alConfuso?: () => void;
 }
 
 /** Traduce errores técnicos del micrófono a mensajes para estudiantes. */
@@ -190,6 +192,11 @@ export class MotorEscucha {
     );
     if (resultado !== null) {
       this.callbacks.alConfirmar(resultado.simbolo, resultado.snrDb);
+    } else if (
+      this.callbacks.alConfuso !== undefined &&
+      (this.detector.leerConfusion?.() ?? false)
+    ) {
+      this.callbacks.alConfuso();
     }
   }
 
