@@ -6,31 +6,21 @@ import {
   normalizarFrase,
   sugerirFrases,
 } from '../audio/frases.ts';
-import {
-  agregarAlHistorial,
-  cargarHistorial,
-  guardarHistorial,
-} from '../utils/historial.ts';
-import {
-  agregarFrase,
-  cargarFrasesPersonalizadas,
-  guardarFrasesPersonalizadas,
-} from '../utils/fraseario.ts';
+import { useAjustes } from '../hooks/useAjustes.ts';
+import { useAviso } from '../hooks/useAviso.ts';
+import { useFrasesPersonalizadas } from '../hooks/useFrasesPersonalizadas.ts';
+import { useHistorial } from '../hooks/useHistorial.ts';
+import { useVoz } from '../hooks/useVoz.ts';
+import { useVocesEspanolas } from '../hooks/useVocesEspanolas.ts';
 import {
   asegurarAudioListo,
   solicitarDetencionMelodia,
   tocarMelodia,
 } from '../audio/instrumento.ts';
 import { DetectorMelodia, type LecturaTono } from '../audio/melodia.ts';
-import { callar, hablar, hayVoz, listarVocesEspanolas } from '../audio/voz.ts';
+import { callar, hayVoz } from '../audio/voz.ts';
 import { motorEscucha } from '../audio/escucha.ts';
-import {
-  AJUSTES_POR_DEFECTO,
-  LIMITES,
-  cargarAjustes,
-  guardarAjustes,
-  type Ajustes,
-} from '../utils/ajustes.ts';
+import { AJUSTES_POR_DEFECTO, LIMITES } from '../utils/ajustes.ts';
 import type { NivelSenal } from '../types/index.ts';
 import Afinador from './Afinador.tsx';
 import MedidorSnr from './MedidorSnr.tsx';
@@ -39,8 +29,6 @@ import estilos from './InstrumentoPanel.module.css';
 
 /** Silencio (ms) tras la última nota antes de decir la frase en voz alta. */
 const RETRASO_FRASE_MS = 1200;
-/** Tope (ms) de espera al fin de la voz antes de reabrir el micrófono. */
-const TOPE_VOZ_MS = 15000;
 /** Máximo de letras que se conservan de la transcripción. */
 const MAX_TEXTO = 200;
 
@@ -63,19 +51,14 @@ export default function InstrumentoPanel(): React.JSX.Element {
   /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
   const receptorTonoRef = useRef<((lectura: LecturaTono | null) => void) | null>(null);
   const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
-  const [personalizadas, setPersonalizadas] = useState<string[]>(cargarFrasesPersonalizadas);
   const [nuevaFrase, setNuevaFrase] = useState('');
-  const [historial, setHistorial] = useState<string[]>(cargarHistorial);
-  const [aviso, setAviso] = useState<string | null>(null);
-  const avisoTimerRef = useRef(0);
-  const [ajustes, setAjustes] = useState<Ajustes>(cargarAjustes);
-  const [voces, setVoces] = useState<string[]>([]);
-  /** Copia en ref para que los callbacks de larga vida lean lo último. */
-  const ajustesRef = useRef(ajustes);
+  const { ajustes, setAjustes, ajustesRef } = useAjustes();
+  const voces = useVocesEspanolas();
+  const { historial, registrar, borrar: borrarHistorial } = useHistorial();
+  const { personalizadas, anadir, quitar: quitarFrase } = useFrasesPersonalizadas();
+  const { aviso, mostrarAviso } = useAviso();
+  const { hablarConPausa, pausaTranscripcionRef } = useVoz(ajustesRef, registrar);
   const detencionRef = useRef(false);
-  /** El micro no transcribe mientras la app habla o toca (anti-eco). */
-  const pausaTranscripcionRef = useRef(false);
-  const finVozTimerRef = useRef(0);
   const ultimoHabladoRef = useRef('');
 
   // Fraseario: si lo transcrito equivale a una frase esencial, se habla.
@@ -102,70 +85,11 @@ export default function InstrumentoPanel(): React.JSX.Element {
   }, [texto, personalizadas]);
 
   useEffect(() => {
-    ajustesRef.current = ajustes;
-    guardarAjustes(ajustes);
-  }, [ajustes]);
-
-  // Las voces del sistema se cargan de forma asíncrona.
-  useEffect(() => {
-    if (!hayVoz()) return undefined;
-    const leer = (): void => setVoces(listarVocesEspanolas().map((v) => v.name));
-    leer();
-    window.speechSynthesis.addEventListener('voiceschanged', leer);
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', leer);
-  }, []);
-
-  useEffect(() => {
     return () => {
       detencionRef.current = true;
       solicitarDetencionMelodia();
-      window.clearTimeout(finVozTimerRef.current);
-      window.clearTimeout(avisoTimerRef.current);
-      callar();
     };
   }, []);
-
-  /**
-   * Habla pausando la transcripción: sin esto, el micrófono oye el
-   * propio altavoz (la frase hablada) y aparecen letras fantasma.
-   * Se reanuda al terminar la voz, con temporizador de seguridad por
-   * si el evento de fin no llega en algún navegador.
-   */
-  const hablarConPausa = (textoVoz: string): boolean => {
-    // Lo que se dice queda en el historial (para repetirlo con un toque).
-    setHistorial((h) => {
-      const nuevo = agregarAlHistorial(h, textoVoz);
-      guardarHistorial(nuevo);
-      return nuevo;
-    });
-    pausaTranscripcionRef.current = true;
-    window.clearTimeout(finVozTimerRef.current);
-    const inicio = Date.now();
-    const liberar = (): void => {
-      window.clearTimeout(finVozTimerRef.current);
-      pausaTranscripcionRef.current = false;
-    };
-    const ok = hablar(textoVoz, liberar, {
-      velocidad: ajustesRef.current.velocidadVoz,
-      vozNombre: ajustesRef.current.vozNombre,
-    });
-    // Respaldo si `onend` no llega: mientras el navegador siga hablando se
-    // espera (con tope), en vez de adivinar la duración por la longitud.
-    const vigilar = (): void => {
-      const sigueHablando =
-        hayVoz() && window.speechSynthesis.speaking === true;
-      if (sigueHablando && Date.now() - inicio < TOPE_VOZ_MS) {
-        finVozTimerRef.current = window.setTimeout(vigilar, 400);
-      } else {
-        liberar();
-      }
-    };
-    finVozTimerRef.current = window.setTimeout(
-      vigilar,
-      1200 + textoVoz.length * 150,
-    );
-    return ok;
-  };
 
   const tocar = async (): Promise<void> => {
     if (tocando || mensaje.trim().length === 0) return;
@@ -256,12 +180,6 @@ export default function InstrumentoPanel(): React.JSX.Element {
     return () => document.removeEventListener('visibilitychange', alVolver);
   }, []);
 
-  const mostrarAviso = (mensaje: string): void => {
-    setAviso(mensaje);
-    window.clearTimeout(avisoTimerRef.current);
-    avisoTimerRef.current = window.setTimeout(() => setAviso(null), 2500);
-  };
-
   const textoCompartible = (): string => fraseDetectada ?? texto;
 
   const copiarTexto = async (): Promise<void> => {
@@ -281,11 +199,6 @@ export default function InstrumentoPanel(): React.JSX.Element {
     }
   };
 
-  const borrarHistorial = (): void => {
-    setHistorial([]);
-    guardarHistorial([]);
-  };
-
   const borrarUltima = (): void => {
     setTexto((t) => t.slice(0, -1));
     setConfuso(false);
@@ -293,21 +206,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
   };
 
   const anadirFrase = (): void => {
-    const resultado = agregarFrase(personalizadas, nuevaFrase);
-    if (resultado.error !== null) {
-      setErrorLocal(resultado.error);
-      return;
-    }
-    setErrorLocal(null);
-    setPersonalizadas(resultado.frases);
-    guardarFrasesPersonalizadas(resultado.frases);
-    setNuevaFrase('');
-  };
-
-  const quitarFrase = (frase: string): void => {
-    const restantes = personalizadas.filter((f) => f !== frase);
-    setPersonalizadas(restantes);
-    guardarFrasesPersonalizadas(restantes);
+    const error = anadir(nuevaFrase);
+    setErrorLocal(error);
+    if (error === null) setNuevaFrase('');
   };
 
   const sugerencias =
