@@ -7,6 +7,11 @@ import {
   sugerirFrases,
 } from '../audio/frases.ts';
 import {
+  agregarAlHistorial,
+  cargarHistorial,
+  guardarHistorial,
+} from '../utils/historial.ts';
+import {
   agregarFrase,
   cargarFrasesPersonalizadas,
   guardarFrasesPersonalizadas,
@@ -60,6 +65,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
   const [personalizadas, setPersonalizadas] = useState<string[]>(cargarFrasesPersonalizadas);
   const [nuevaFrase, setNuevaFrase] = useState('');
+  const [historial, setHistorial] = useState<string[]>(cargarHistorial);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const avisoTimerRef = useRef(0);
   const [ajustes, setAjustes] = useState<Ajustes>(cargarAjustes);
   const [voces, setVoces] = useState<string[]>([]);
   /** Copia en ref para que los callbacks de larga vida lean lo último. */
@@ -112,6 +120,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       detencionRef.current = true;
       solicitarDetencionMelodia();
       window.clearTimeout(finVozTimerRef.current);
+      window.clearTimeout(avisoTimerRef.current);
       callar();
     };
   }, []);
@@ -123,6 +132,12 @@ export default function InstrumentoPanel(): React.JSX.Element {
    * si el evento de fin no llega en algún navegador.
    */
   const hablarConPausa = (textoVoz: string): boolean => {
+    // Lo que se dice queda en el historial (para repetirlo con un toque).
+    setHistorial((h) => {
+      const nuevo = agregarAlHistorial(h, textoVoz);
+      guardarHistorial(nuevo);
+      return nuevo;
+    });
     pausaTranscripcionRef.current = true;
     window.clearTimeout(finVozTimerRef.current);
     const inicio = Date.now();
@@ -240,6 +255,36 @@ export default function InstrumentoPanel(): React.JSX.Element {
     document.addEventListener('visibilitychange', alVolver);
     return () => document.removeEventListener('visibilitychange', alVolver);
   }, []);
+
+  const mostrarAviso = (mensaje: string): void => {
+    setAviso(mensaje);
+    window.clearTimeout(avisoTimerRef.current);
+    avisoTimerRef.current = window.setTimeout(() => setAviso(null), 2500);
+  };
+
+  const textoCompartible = (): string => fraseDetectada ?? texto;
+
+  const copiarTexto = async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(textoCompartible());
+      mostrarAviso('Texto copiado.');
+    } catch {
+      mostrarAviso('No se pudo copiar: selecciona el texto a mano.');
+    }
+  };
+
+  const compartirTexto = async (): Promise<void> => {
+    try {
+      await navigator.share({ text: textoCompartible() });
+    } catch {
+      // La persona canceló el menú de compartir: no es un error.
+    }
+  };
+
+  const borrarHistorial = (): void => {
+    setHistorial([]);
+    guardarHistorial([]);
+  };
 
   const borrarUltima = (): void => {
     setTexto((t) => t.slice(0, -1));
@@ -365,6 +410,22 @@ export default function InstrumentoPanel(): React.JSX.Element {
         </button>
         <button
           type="button"
+          onClick={() => void copiarTexto()}
+          disabled={texto.length === 0}
+        >
+          <span aria-hidden="true">📋</span> Copiar
+        </button>
+        {typeof navigator.share === 'function' && (
+          <button
+            type="button"
+            onClick={() => void compartirTexto()}
+            disabled={texto.length === 0}
+          >
+            <span aria-hidden="true">↗</span> Compartir
+          </button>
+        )}
+        <button
+          type="button"
           onClick={borrarUltima}
           disabled={texto.length === 0}
           aria-label="Borrar la última letra"
@@ -383,6 +444,10 @@ export default function InstrumentoPanel(): React.JSX.Element {
       {/* Anuncia el estado del micrófono a lectores de pantalla. */}
       <p className={estilos.soloLector} role="status">
         {escuchando ? 'Micrófono activado: escuchando.' : ''}
+      </p>
+
+      <p className={estilos.exito} role="status">
+        {aviso ?? ''}
       </p>
 
       {errorLocal !== null && (
@@ -451,6 +516,35 @@ export default function InstrumentoPanel(): React.JSX.Element {
           la vez).
         </p>
       )}
+
+      <details className={estilos.tabla}>
+        <summary>Historial (lo último que se dijo)</summary>
+        {historial.length === 0 ? (
+          <p className={estilos.ayuda}>Todavía no se ha dicho nada.</p>
+        ) : (
+          <>
+            <ul className={estilos.propias}>
+              {historial.map((frase) => (
+                <li key={frase}>
+                  <span>{frase}</span>
+                  <button
+                    type="button"
+                    onClick={() => decirFrase(frase)}
+                    aria-label={`Decir otra vez: ${frase}`}
+                  >
+                    Decir
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className={estilos.nuevaFrase}>
+              <button type="button" onClick={borrarHistorial}>
+                Borrar historial
+              </button>
+            </div>
+          </>
+        )}
+      </details>
 
       <details className={estilos.tabla}>
         <summary>Ajustes (velocidad y voz)</summary>

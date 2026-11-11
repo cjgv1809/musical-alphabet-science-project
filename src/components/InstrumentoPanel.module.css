@@ -410,3 +410,12 @@
   align-items: center;
   gap: 0.5rem;
 }
+
+/* Confirmación breve (copiado). Reserva su alto para no mover el layout. */
+.exito {
+  min-height: 1.5rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+  color: var(--accent-listen);
+  font-weight: 700;
+}
