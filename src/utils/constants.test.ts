@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DURACION_MINIMA_MS,
   DURACION_SIMBOLO_MS,
+  FRECUENCIA_CORTE_GRAVES,
   FRECUENCIA_MAXIMA,
   FRECUENCIA_MINIMA,
   PAUSA_ENTRE_SIMBOLOS_MS,
@@ -20,6 +21,10 @@ describe('constants', () => {
   it('usa la banda de voz 300–3000 Hz', () => {
     expect(FRECUENCIA_MINIMA).toBe(300);
     expect(FRECUENCIA_MAXIMA).toBe(3000);
+  });
+
+  it('el corte de graves del micro deja pasar la nota más grave (espacio RE3)', () => {
+    expect(FRECUENCIA_CORTE_GRAVES).toBeLessThan(146.83);
   });
 
   it('exige duración mínima de 50 ms contra ruidos impulsivos', () => {

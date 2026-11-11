@@ -17,6 +17,13 @@ import { motorEscucha } from '../audio/escucha.ts';
 import type { NivelSenal } from '../types/index.ts';
 import estilos from './InstrumentoPanel.module.css';
 
+/** Silencio (ms) tras la última nota antes de decir la frase en voz alta. */
+const RETRASO_FRASE_MS = 1200;
+/** Tope (ms) de espera al fin de la voz antes de reabrir el micrófono. */
+const TOPE_VOZ_MS = 15000;
+/** Máximo de letras que se conservan de la transcripción. */
+const MAX_TEXTO = 200;
+
 /**
  * Panel principal: de la guitarra a las palabras (modo accesible).
  * - "Tocar melodía": el emisor sintetizado toca el texto.
@@ -42,17 +49,25 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
   // Fraseario: si lo transcrito equivale a una frase esencial, se habla.
   // (Se compara sin espacios: la guitarra no los emite.)
+  // Se espera un momento sin notas nuevas antes de hablar: "NO" no debe
+  // sonar si la persona sigue deletreando "NOCHE". Si el texto cambia, el
+  // temporizador se cancela y se reinicia.
   useEffect(() => {
     const frase = buscarFrase(texto);
     setFraseDetectada(frase);
-    if (frase !== null && ultimoHabladoRef.current !== texto) {
+    // Texto nuevo (distinto al último hablado): permite repetir la misma
+    // frase más tarde, p. ej. AGUA … AGUA.
+    if (ultimoHabladoRef.current !== texto) ultimoHabladoRef.current = '';
+    if (frase === null || ultimoHabladoRef.current === texto) return undefined;
+    const id = window.setTimeout(() => {
       ultimoHabladoRef.current = texto;
       if (!hablarConPausa(frase) && !hayVoz()) {
         setErrorLocal(
           'Este navegador no tiene voz sintetizada: la frase se muestra pero no suena.',
         );
       }
-    }
+    }, RETRASO_FRASE_MS);
+    return () => window.clearTimeout(id);
   }, [texto]);
 
   useEffect(() => {
@@ -73,13 +88,26 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const hablarConPausa = (textoVoz: string): boolean => {
     pausaTranscripcionRef.current = true;
     window.clearTimeout(finVozTimerRef.current);
+    const inicio = Date.now();
     const liberar = (): void => {
+      window.clearTimeout(finVozTimerRef.current);
       pausaTranscripcionRef.current = false;
     };
     const ok = hablar(textoVoz, liberar);
+    // Respaldo si `onend` no llega: mientras el navegador siga hablando se
+    // espera (con tope), en vez de adivinar la duración por la longitud.
+    const vigilar = (): void => {
+      const sigueHablando =
+        hayVoz() && window.speechSynthesis.speaking === true;
+      if (sigueHablando && Date.now() - inicio < TOPE_VOZ_MS) {
+        finVozTimerRef.current = window.setTimeout(vigilar, 400);
+      } else {
+        liberar();
+      }
+    };
     finVozTimerRef.current = window.setTimeout(
-      liberar,
-      Math.min(9000, 1200 + textoVoz.length * 150),
+      vigilar,
+      1200 + textoVoz.length * 150,
     );
     return ok;
   };
@@ -115,7 +143,18 @@ export default function InstrumentoPanel(): React.JSX.Element {
             // Ignora lo que suena mientras la app habla o toca.
             if (pausaTranscripcionRef.current) return;
             setConfuso(false);
-            setTexto((t) => t + simbolo);
+            // Si lo anterior ya se dijo en voz alta como frase, empieza
+            // una frase nueva (así se puede decir AGUA, y luego AYUDA).
+            setTexto((t) =>
+              t !== '' && t === ultimoHabladoRef.current
+                ? simbolo
+                : (t + simbolo).slice(-MAX_TEXTO),
+            );
+          },
+          // Sonido fuerte sin nota clara (acorde rasgueado): sugiere una cuerda.
+          alConfuso: () => {
+            if (pausaTranscripcionRef.current) return;
+            setConfuso(true);
           },
           alNivel: (nuevoNivel) => setNivel(nuevoNivel),
         },

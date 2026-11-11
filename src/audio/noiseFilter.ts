@@ -1,11 +1,11 @@
-import { FRECUENCIA_MAXIMA, FRECUENCIA_MINIMA } from '../utils/constants.ts';
+import { FRECUENCIA_CORTE_GRAVES, FRECUENCIA_MAXIMA } from '../utils/constants.ts';
 
 /**
  * Acondicionamiento de la señal del micrófono.
  *
- * Filtro pasa-banda 300–3000 Hz ANTES del análisis: deja pasar la
- * banda donde "hablamos" (nuestras notas van de 220 a 932 Hz) y
- * atenúa graves (<300 Hz: ventiladores, pasos) y agudos (>3000 Hz).
+ * Filtro pasa-banda 100–3000 Hz ANTES del análisis: deja pasar todas
+ * nuestras notas (de 146.83 Hz, el espacio, a 932 Hz) y atenúa graves
+ * (<100 Hz: ventiladores, pasos) y agudos (>3000 Hz).
  *
  * Concepto físico: un filtro deja pasar unas frecuencias y recorta
  * otras. Usamos DOS en serie (pasa-altas + pasa-bajas) porque un único
@@ -19,14 +19,14 @@ export interface CadenaAntiRuido {
   entrada: GainNode;
   /** Punto de salida: conectar aquí el analizador. */
   salida: GainNode;
-  /** Recorta graves por debajo de 300 Hz (ventiladores, pasos). */
+  /** Recorta graves por debajo de 100 Hz (ventiladores, pasos). */
   filtroPasaAltas: BiquadFilterNode;
   /** Recorta agudos por encima de 3000 Hz (chillidos, ultrasonidos). */
   filtroPasaBajas: BiquadFilterNode;
 }
 
 /**
- * Crea la cadena pasa-banda: micrófono → pasa-altas (300 Hz) →
+ * Crea la cadena pasa-banda: micrófono → pasa-altas (100 Hz) →
  * pasa-bajas (3000 Hz) → analizador.
  */
 export function crearCadenaAntiRuido(
@@ -37,7 +37,7 @@ export function crearCadenaAntiRuido(
 
   const filtroPasaAltas = contexto.createBiquadFilter();
   filtroPasaAltas.type = 'highpass';
-  filtroPasaAltas.frequency.value = FRECUENCIA_MINIMA;
+  filtroPasaAltas.frequency.value = FRECUENCIA_CORTE_GRAVES;
   filtroPasaAltas.Q.value = 0.7;
 
   const filtroPasaBajas = contexto.createBiquadFilter();

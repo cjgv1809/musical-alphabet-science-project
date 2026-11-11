@@ -133,7 +133,7 @@ src/
 │   ├── melodia.ts        # DetectorMelodia + E2E seno/guitarra (+ tests)
 │   ├── instrumento.ts    # Emisor de melodías (una nota por letra)
 │   ├── escucha.ts        # Motor en vivo: micrófono → detector cada 40 ms
-│   ├── noiseFilter.ts    # Pasa-banda 300–3000 Hz + SNR en dB
+│   ├── noiseFilter.ts    # Pasa-banda 100–3000 Hz + SNR en dB
 │   ├── frases.ts         # Fraseario esencial (ignora espacios) (+ tests)
 │   └── voz.ts            # Síntesis de voz en español (+ tests)
 ├── components/
@@ -150,7 +150,7 @@ mínimos → una emisión por nota sostenida.
 | Parámetro | Valor |
 |---|---|
 | Ventana / tick | 1024 muestras / 40 ms |
-| Búsqueda YIN | 150–1500 Hz, umbral 0.15, RMS mín. 0.01 |
+| Búsqueda YIN | 120–1500 Hz, umbral 0.15, RMS mín. 0.01 |
 | Tolerancia | ±45 cents |
 | Confirmación | 2 ventanas + 50 ms |
 | Emisión | 500 ms por nota + 60 ms de pausa |

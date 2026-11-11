@@ -12,6 +12,13 @@
 export const FRECUENCIA_MINIMA = 300;
 export const FRECUENCIA_MAXIMA = 3000;
 
+// Corte del pasa-altas del micrófono (Hz). Más bajo que FRECUENCIA_MINIMA a
+// propósito: las notas más graves (espacio RE3 = 146.83 Hz, signos 155–208 Hz
+// y A–F = 220–293 Hz) caen por debajo de 300 Hz. Un corte a 300 Hz las
+// atenuaría (hasta -13 dB) y con timbres ricos en armónicos YIN podría
+// confundirlas con su octava. A 100 Hz se sigue recortando el ruido grave.
+export const FRECUENCIA_CORTE_GRAVES = 100;
+
 // Ventana de análisis para Goertzel (n.º de muestras por bloque).
 // 1024 muestras a 44100 Hz ≈ 23 ms por ventana.
 export const TAMANO_VENTANA = 1024;

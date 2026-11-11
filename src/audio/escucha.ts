@@ -7,11 +7,10 @@ import { DetectorMelodia, type DetectorDeSimbolos } from './melodia.ts';
  * Motor de escucha: micrófono → filtro pasa-banda → detector en vivo.
  *
  * Cómo funciona (cadena de audio):
- *   micrófono → pasa-altas 300 Hz → pasa-bajas 3000 Hz → AnalyserNode
+ *   micrófono → pasa-altas 100 Hz → pasa-bajas 3000 Hz → AnalyserNode
  * Cada 40 ms copiamos una ventana de muestras en el dominio del tiempo
  * y la pasamos por el detector (`DetectorMelodia`: estima la fundamental
  * y la redondea a la letra más cercana).
- * El mismo AnalyserNode lo lee `SpectrumVisualizer` para dibujar.
  *
  * El medidor de nivel es APROXIMADO (RMS de la ventana + seguidor de
  * mínimo como "ruido base"): sirve para el indicador visual y para
@@ -239,5 +238,5 @@ export class MotorEscucha {
   }
 }
 
-/** Instancia compartida: DecoderPanel la controla, el visualizador la lee. */
+/** Instancia compartida: InstrumentoPanel la controla. */
 export const motorEscucha = new MotorEscucha();
