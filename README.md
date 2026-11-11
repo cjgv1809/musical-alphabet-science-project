@@ -174,7 +174,7 @@ mínimos → una emisión por nota sostenida.
 
 | Web (actual) | React Native + Expo |
 |---|---|
-| `instrumento.ts` (Tone.js) | `expo-audio`: generar el buffer PCM de la nota (envolvente incluida) |
+| `instrumento.ts` (Web Audio nativo) | `expo-audio`: generar el buffer PCM de la nota (envolvente incluida) |
 | `escucha.ts` (`getUserMedia` + `AudioContext`) | grabación PCM mono 44100 Hz → ventanas de 1024 cada 40 ms → `DetectorMelodia` sin cambios |
 | `voz.ts` (SpeechSynthesis) | `expo-speech` (misma idea, una línea por frase) |
 | CSS Modules | `StyleSheet` de RN |

@@ -1,4 +1,3 @@
-import * as Tone from 'tone';
 import {
   normalizarSimboloCromatico,
   obtenerFrecuenciaNota,
@@ -9,12 +8,39 @@ import {
 } from '../utils/constants.ts';
 
 /**
+ * Emisor de melodías: UNA nota por letra, con Web Audio nativo.
+ *
+ * Suena un solo oscilador senoidal en la frecuencia cromática de la
+ * letra. ¿Por qué seno puro y no "sonido de guitarra"? Porque primero
+ * validamos la CADENA (emisor → aire → detector) con la señal más
+ * limpia posible; la robustez ante timbres reales (guitarra) la
+ * demuestra el detector en `melodia.test.ts` con armónicos sintéticos.
+ *
+ * Sin librerías: un `OscillatorNode` + un `GainNode` bastan, y la
+ * envolvente (subida/bajada anti-clic) se programa sobre el reloj del
+ * audio (`currentTime`), que no se desvía como los temporizadores.
+ */
+
+/** Volumen de pico y rampas de la envolvente (segundos). */
+const GANANCIA_PICO = 0.5;
+const ATAQUE_S = 0.02;
+const RELEVO_S = 0.03;
+
+let contexto: AudioContext | null = null;
+
+function obtenerContexto(): AudioContext {
+  contexto ??= new AudioContext();
+  return contexto;
+}
+
+/**
  * Desbloquea el audio del navegador. Los navegadores exigen un gesto
  * del usuario (clic) antes de sonar: hay que llamar a esto desde un
- * botón. Sin esto, Tone.js queda en silencio.
+ * botón. Sin esto, el contexto queda suspendido y en silencio.
  */
 export async function asegurarAudioListo(): Promise<void> {
-  await Tone.start();
+  const ctx = obtenerContexto();
+  if (ctx.state !== 'running') await ctx.resume();
 }
 
 /** Pausa asíncrona entre notas. */
@@ -23,16 +49,6 @@ function esperarMs(ms: number): Promise<void> {
     window.setTimeout(resolve, ms);
   });
 }
-
-/**
- * Emisor de melodías: UNA nota por letra.
- *
- * Suena un solo oscilador senoidal en la frecuencia cromática de la
- * letra. ¿Por qué seno puro y no "sonido de guitarra"? Porque primero
- * validamos la CADENA (emisor → aire → detector) con la señal más
- * limpia posible; la robustez ante timbres reales (guitarra) la
- * demuestra el detector en `melodia.test.ts` con armónicos sintéticos.
- */
 
 export interface OpcionesTocarMelodia {
   duracionMs?: number;
@@ -62,29 +78,37 @@ export async function tocarNota(
   const frecuencia = obtenerFrecuenciaNota(simbolo);
   if (frecuencia === null) return false;
 
-  const oscilador = new Tone.Oscillator(frecuencia, 'sine');
-  const ganancia = new Tone.Gain(0);
+  const ctx = obtenerContexto();
+  if (ctx.state !== 'running') await ctx.resume();
+
+  const oscilador = ctx.createOscillator();
+  oscilador.type = 'sine';
+  oscilador.frequency.value = frecuencia;
+  const ganancia = ctx.createGain();
   oscilador.connect(ganancia);
-  ganancia.connect(Tone.getDestination());
+  ganancia.connect(ctx.destination);
 
-  const ahora = Tone.now();
-  ganancia.gain.rampTo(0.5, 0.02, ahora);
-  oscilador.start(ahora);
+  // Toda la envolvente se programa de una vez sobre el reloj del audio.
+  const inicio = ctx.currentTime;
+  const finSostenido = inicio + duracionMs / 1000;
+  ganancia.gain.setValueAtTime(0, inicio);
+  ganancia.gain.linearRampToValueAtTime(GANANCIA_PICO, inicio + ATAQUE_S);
+  ganancia.gain.setValueAtTime(GANANCIA_PICO, finSostenido);
+  ganancia.gain.linearRampToValueAtTime(0, finSostenido + RELEVO_S);
+  oscilador.start(inicio);
+  oscilador.stop(finSostenido + RELEVO_S + 0.01);
+  oscilador.onended = () => {
+    oscilador.disconnect();
+    ganancia.disconnect();
+  };
 
-  await esperarMs(duracionMs);
-
-  ganancia.gain.rampTo(0, 0.03, Tone.now());
-  await esperarMs(40);
-
-  oscilador.stop();
-  oscilador.dispose();
-  ganancia.dispose();
+  await esperarMs(duracionMs + RELEVO_S * 1000 + 10);
   return true;
 }
 
 /**
- * Toca un mensaje como melodía. El espacio suena como silencio largo
- * (así se oye dónde termina cada palabra); lo no soportado se salta.
+ * Toca un mensaje como melodía. Lo no soportado se salta con una
+ * pausa; el espacio tiene nota propia (RE3), ver `cromatico.ts`.
  */
 export async function tocarMelodia(
   mensaje: string,

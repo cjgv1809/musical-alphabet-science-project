@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  SIMBOLOS_CROMATICOS,
-  SIMBOLOS_PUNTUACION,
-  obtenerFrecuenciaNota,
-  obtenerNombreNota,
-} from '../audio/cromatico.ts';
+import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
 import { FRASES_ESENCIALES, buscarFrase, normalizarFrase } from '../audio/frases.ts';
 import {
   asegurarAudioListo,
@@ -15,6 +10,8 @@ import { DetectorMelodia } from '../audio/melodia.ts';
 import { callar, hablar, hayVoz } from '../audio/voz.ts';
 import { motorEscucha } from '../audio/escucha.ts';
 import type { NivelSenal } from '../types/index.ts';
+import MedidorSnr from './MedidorSnr.tsx';
+import TablaNotas from './TablaNotas.tsx';
 import estilos from './InstrumentoPanel.module.css';
 
 /** Silencio (ms) tras la última nota antes de decir la frase en voz alta. */
@@ -40,7 +37,8 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const [fraseDetectada, setFraseDetectada] = useState<string | null>(null);
   const [confuso, setConfuso] = useState(false);
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
-  const [nivel, setNivel] = useState<NivelSenal>({ senal: 0, ruido: 0, snrDb: 0 });
+  /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
+  const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
   const detencionRef = useRef(false);
   /** El micro no transcribe mientras la app habla o toca (anti-eco). */
   const pausaTranscripcionRef = useRef(false);
@@ -156,7 +154,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
             if (pausaTranscripcionRef.current) return;
             setConfuso(true);
           },
-          alNivel: (nuevoNivel) => setNivel(nuevoNivel),
+          alNivel: (nuevoNivel) => receptorNivelRef.current?.(nuevoNivel),
         },
         new DetectorMelodia(),
       );
@@ -172,7 +170,6 @@ export default function InstrumentoPanel(): React.JSX.Element {
     motorEscucha.detener();
     setEscuchando(false);
     setConfuso(false);
-    setNivel({ senal: 0, ruido: 0, snrDb: 0 });
   };
 
   // Los móviles suspenden el audio al ocultar la app: al volver a ella,
@@ -181,7 +178,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   useEffect(() => {
     const alVolver = (): void => {
       if (document.hidden) return;
-      // Emisor: despierta el contexto de Tone.js.
+      // Emisor: despierta el contexto de audio.
       void asegurarAudioListo().catch(() => undefined);
       // Receptor: solo si estaba escuchando.
       if (!motorEscucha.estaActivo()) return;
@@ -322,11 +319,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
             texto
           )}
         </div>
-        {escuchando && (
-          <p className={estilos.snr}>
-            Señal/ruido: <strong>{nivel.snrDb.toFixed(0)} dB</strong>
-          </p>
-        )}
+        {escuchando && <MedidorSnr receptor={receptorNivelRef} />}
       </div>
 
       {fraseDetectada !== null && (
@@ -370,36 +363,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
       <details className={estilos.tabla}>
         <summary>Ver notas, signos y espacio (para afinar la guitarra)</summary>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Letra</th>
-              <th scope="col">Nota</th>
-              <th scope="col">Hz</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SIMBOLOS_CROMATICOS.map((s) => (
-              <tr key={s}>
-                <td>{s}</td>
-                <td>{obtenerNombreNota(s)}</td>
-                <td>{obtenerFrecuenciaNota(s)}</td>
-              </tr>
-            ))}
-            {SIMBOLOS_PUNTUACION.map((s) => (
-              <tr key={s}>
-                <td>{s}</td>
-                <td>{obtenerNombreNota(s)}</td>
-                <td>{obtenerFrecuenciaNota(s)}</td>
-              </tr>
-            ))}
-            <tr key="espacio">
-              <td>␣ ESPACIO</td>
-              <td>{obtenerNombreNota(' ')}</td>
-              <td>{obtenerFrecuenciaNota(' ')}</td>
-            </tr>
-          </tbody>
-        </table>
+        <TablaNotas />
       </details>
     </section>
   );
