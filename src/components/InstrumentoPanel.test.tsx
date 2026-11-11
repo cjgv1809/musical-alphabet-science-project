@@ -44,6 +44,13 @@ describe('InstrumentoPanel (escucha simulada)', () => {
     expect(screen.getByText(/una sola cuerda/i)).toBeInTheDocument();
   });
 
+  it('Borrar quita solo la última letra', async () => {
+    await empezar();
+    tocar('HOLA');
+    act(() => screen.getByRole('button', { name: /borrar la última letra/i }).click());
+    expect(screen.getByRole('log', { name: /melodía transcrita/i })).toHaveTextContent(/^HOL$/);
+  });
+
   it('espera un silencio antes de hablar: NO no suena si sigue NOCHE', async () => {
     await empezar();
     tocar('NO');
@@ -63,5 +70,17 @@ describe('InstrumentoPanel (escucha simulada)', () => {
     tocar('AGUA');
     act(() => vi.advanceTimersByTime(1500));
     expect(voz.hablar).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('InstrumentoPanel (accesibilidad)', () => {
+  it('no tiene violaciones axe', async () => {
+    const axe = (await import('axe-core')).default;
+    const { container } = render(<InstrumentoPanel />);
+    // jsdom no calcula estilos reales: el contraste no se puede medir aquí.
+    const resultado = await axe.run(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    });
+    expect(resultado.violations).toEqual([]);
   });
 });

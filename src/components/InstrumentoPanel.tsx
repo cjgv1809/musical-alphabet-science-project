@@ -141,6 +141,8 @@ export default function InstrumentoPanel(): React.JSX.Element {
             // Ignora lo que suena mientras la app habla o toca.
             if (pausaTranscripcionRef.current) return;
             setConfuso(false);
+            // Vibración breve: confirma la letra sin mirar ni oír (si hay soporte).
+            navigator.vibrate?.(25);
             // Si lo anterior ya se dijo en voz alta como frase, empieza
             // una frase nueva (así se puede decir AGUA, y luego AYUDA).
             setTexto((t) =>
@@ -194,6 +196,12 @@ export default function InstrumentoPanel(): React.JSX.Element {
     document.addEventListener('visibilitychange', alVolver);
     return () => document.removeEventListener('visibilitychange', alVolver);
   }, []);
+
+  const borrarUltima = (): void => {
+    setTexto((t) => t.slice(0, -1));
+    setConfuso(false);
+    callar();
+  };
 
   const limpiarTexto = (): void => {
     setTexto('');
@@ -281,12 +289,25 @@ export default function InstrumentoPanel(): React.JSX.Element {
         </button>
         <button
           type="button"
+          onClick={borrarUltima}
+          disabled={texto.length === 0}
+          aria-label="Borrar la última letra"
+        >
+          <span aria-hidden="true">⌫</span> Borrar
+        </button>
+        <button
+          type="button"
           onClick={limpiarTexto}
           disabled={texto.length === 0}
         >
           Limpiar
         </button>
       </div>
+
+      {/* Anuncia el estado del micrófono a lectores de pantalla. */}
+      <p className={estilos.soloLector} role="status">
+        {escuchando ? 'Micrófono activado: escuchando.' : ''}
+      </p>
 
       {errorLocal !== null && (
         <p className={estilos.error} role="alert">
@@ -295,7 +316,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       )}
 
       <div className={estilos.doble}>
-        <div className={estilos.ahoraSuena} aria-live="polite">
+        <div className={estilos.ahoraSuena}>
           {notaActual === null ? (
             <span className={estilos.apagado}>—</span>
           ) : (
@@ -308,7 +329,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
             </span>
           )}
         </div>
-        <div className={estilos.resultado} aria-live="polite" aria-label="Melodía transcrita">
+        <div className={estilos.resultado} role="log" aria-live="polite" aria-label="Melodía transcrita">
           {texto.length === 0 ? (
             <span className={estilos.vacio}>
               {escuchando
