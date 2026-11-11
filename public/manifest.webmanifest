@@ -1,0 +1,23 @@
+{
+  "name": "Notas que hablan — Guitarra a palabras",
+  "short_name": "Notas que hablan",
+  "description": "Toca una melodía con la guitarra y la app la convierte en palabras y voz.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#eef1f7",
+  "theme_color": "#9a5518",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

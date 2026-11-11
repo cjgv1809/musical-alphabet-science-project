@@ -17,3 +17,13 @@ ReactDOM.createRoot(raiz).render(
     </ErrorBoundary>
   </React.StrictMode>,
 );
+
+// Service worker (solo en producción): permite instalar la app y usarla
+// sin conexión. En desarrollo estorbaría con la recarga en caliente.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .catch(() => undefined);
+  });
+}
