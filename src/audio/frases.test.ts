@@ -3,6 +3,7 @@ import {
   FRASES_ESENCIALES,
   buscarFrase,
   normalizarFrase,
+  sugerirFrases,
 } from './frases.ts';
 import { elegirVozEspanola, textoParaVoz } from './voz.ts';
 import { normalizarSimboloCromatico } from './cromatico.ts';
@@ -56,5 +57,18 @@ describe('voz (elección de voz española)', () => {
     // Minúsculas y letras sueltas no se tocan.
     expect(textoParaVoz('hola')).toBe('hola');
     expect(textoParaVoz('A')).toBe('A');
+  });
+
+  it('reconoce también las frases personalizadas', () => {
+    expect(buscarFrase('MARIA', ['María'])).toBe('María');
+    expect(buscarFrase('MARIA')).toBeNull();
+  });
+
+  it('sugiere frases que empiezan igual (mínimo 2 letras, sin la completa)', () => {
+    const todas = [...FRASES_ESENCIALES.map((f) => f.texto), 'AGUA FRIA'];
+    expect(sugerirFrases('A', todas)).toEqual([]);
+    expect(sugerirFrases('AG', todas)).toEqual(['AGUA', 'AGUA FRIA']);
+    expect(sugerirFrases('AGUA', todas)).toEqual(['AGUA FRIA']);
+    expect(sugerirFrases('ZZ', todas)).toEqual([]);
   });
 });

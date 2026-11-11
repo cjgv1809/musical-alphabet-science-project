@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
-import { FRASES_ESENCIALES, buscarFrase, normalizarFrase } from '../audio/frases.ts';
+import {
+  FRASES_ESENCIALES,
+  buscarFrase,
+  normalizarFrase,
+  sugerirFrases,
+} from '../audio/frases.ts';
+import {
+  agregarFrase,
+  cargarFrasesPersonalizadas,
+  guardarFrasesPersonalizadas,
+} from '../utils/fraseario.ts';
 import {
   asegurarAudioListo,
   solicitarDetencionMelodia,
@@ -48,6 +58,8 @@ export default function InstrumentoPanel(): React.JSX.Element {
   /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
   const receptorTonoRef = useRef<((lectura: LecturaTono | null) => void) | null>(null);
   const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
+  const [personalizadas, setPersonalizadas] = useState<string[]>(cargarFrasesPersonalizadas);
+  const [nuevaFrase, setNuevaFrase] = useState('');
   const [ajustes, setAjustes] = useState<Ajustes>(cargarAjustes);
   const [voces, setVoces] = useState<string[]>([]);
   /** Copia en ref para que los callbacks de larga vida lean lo último. */
@@ -64,7 +76,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   // sonar si la persona sigue deletreando "NOCHE". Si el texto cambia, el
   // temporizador se cancela y se reinicia.
   useEffect(() => {
-    const frase = buscarFrase(texto);
+    const frase = buscarFrase(texto, personalizadas);
     setFraseDetectada(frase);
     // Texto nuevo (distinto al último hablado): permite repetir la misma
     // frase más tarde, p. ej. AGUA … AGUA.
@@ -79,7 +91,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       }
     }, RETRASO_FRASE_MS);
     return () => window.clearTimeout(id);
-  }, [texto]);
+  }, [texto, personalizadas]);
 
   useEffect(() => {
     ajustesRef.current = ajustes;
@@ -235,6 +247,38 @@ export default function InstrumentoPanel(): React.JSX.Element {
     callar();
   };
 
+  const anadirFrase = (): void => {
+    const resultado = agregarFrase(personalizadas, nuevaFrase);
+    if (resultado.error !== null) {
+      setErrorLocal(resultado.error);
+      return;
+    }
+    setErrorLocal(null);
+    setPersonalizadas(resultado.frases);
+    guardarFrasesPersonalizadas(resultado.frases);
+    setNuevaFrase('');
+  };
+
+  const quitarFrase = (frase: string): void => {
+    const restantes = personalizadas.filter((f) => f !== frase);
+    setPersonalizadas(restantes);
+    guardarFrasesPersonalizadas(restantes);
+  };
+
+  const sugerencias =
+    fraseDetectada === null
+      ? sugerirFrases(texto, [
+          ...FRASES_ESENCIALES.map((f) => f.texto),
+          ...personalizadas,
+        ])
+      : [];
+
+  const decirFrase = (frase: string): void => {
+    if (!hablarConPausa(frase)) {
+      setErrorLocal('Este navegador no tiene voz sintetizada.');
+    }
+  };
+
   const limpiarTexto = (): void => {
     setTexto('');
     setConfuso(false);
@@ -376,6 +420,23 @@ export default function InstrumentoPanel(): React.JSX.Element {
         {escuchando && <MedidorSnr receptor={receptorNivelRef} />}
       </div>
 
+      {sugerencias.length > 0 && (
+        <p className={estilos.sugerencias}>
+          <span>¿Quieres decir?</span>
+          {sugerencias.map((frase) => (
+            <button
+              key={frase}
+              type="button"
+              className={estilos.sugerencia}
+              onClick={() => decirFrase(frase)}
+              aria-label={`Decir en voz alta: ${frase}`}
+            >
+              {frase}
+            </button>
+          ))}
+        </p>
+      )}
+
       {fraseDetectada !== null && (
         <p className={estilos.fraseReconocida} role="status">
           <span aria-hidden="true">✅</span> Frase reconocida: <strong>{fraseDetectada}</strong>
@@ -442,24 +503,54 @@ export default function InstrumentoPanel(): React.JSX.Element {
       <details className={estilos.tabla}>
         <summary>Frases rápidas (se hablan solas al deletrearlas)</summary>
         <div className={estilos.frasesGrid}>
-          {FRASES_ESENCIALES.map((frase) => (
+          {[...FRASES_ESENCIALES.map((f) => f.texto), ...personalizadas].map((frase) => (
             <button
-              key={frase.texto}
+              key={frase}
               type="button"
               className={estilos.fraseBtn}
-              onClick={() => {
-                if (!hablarConPausa(frase.texto)) {
-                  setErrorLocal(
-                    'Este navegador no tiene voz sintetizada.',
-                  );
-                }
-              }}
-              aria-label={`Decir en voz alta: ${frase.texto}. Notas: ${notasDe(frase.texto)}`}
+              onClick={() => decirFrase(frase)}
+              aria-label={`Decir en voz alta: ${frase}. Notas: ${notasDe(frase)}`}
             >
-              <span>{frase.texto}</span>
-              <small>{notasDe(frase.texto)}</small>
+              <span>{frase}</span>
+              <small>{notasDe(frase)}</small>
             </button>
           ))}
+        </div>
+
+        <div className={estilos.nuevaFrase}>
+          <label htmlFor="nueva-frase">Añadir tu propia frase (nombre, medicación…)</label>
+          <div className={estilos.nuevaFraseFila}>
+            <input
+              id="nueva-frase"
+              type="text"
+              maxLength={40}
+              value={nuevaFrase}
+              onChange={(e) => setNuevaFrase(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') anadirFrase();
+              }}
+              placeholder="Ej. Me llamo Ana"
+            />
+            <button type="button" onClick={anadirFrase} disabled={nuevaFrase.trim() === ''}>
+              Añadir
+            </button>
+          </div>
+          {personalizadas.length > 0 && (
+            <ul className={estilos.propias}>
+              {personalizadas.map((frase) => (
+                <li key={frase}>
+                  <span>{frase}</span>
+                  <button
+                    type="button"
+                    onClick={() => quitarFrase(frase)}
+                    aria-label={`Quitar la frase ${frase}`}
+                  >
+                    Quitar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </details>
 

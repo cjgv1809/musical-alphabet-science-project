@@ -39,11 +39,39 @@ export function normalizarFrase(frase: string): string {
  * ¿Lo transcrito equivale a alguna frase esencial?
  * (La guitarra no emite espacios: "MEDUELE" vale por "ME DUELE".)
  */
-export function buscarFrase(textoTranscrito: string): string | null {
+export function buscarFrase(
+  textoTranscrito: string,
+  personalizadas: readonly string[] = [],
+): string | null {
   const clave = normalizarFrase(textoTranscrito);
   if (clave.length === 0) return null;
-  for (const frase of FRASES_ESENCIALES) {
-    if (normalizarFrase(frase.texto) === clave) return frase.texto;
+  for (const texto of [
+    ...FRASES_ESENCIALES.map((f) => f.texto),
+    ...personalizadas,
+  ]) {
+    if (normalizarFrase(texto) === clave) return texto;
   }
   return null;
+}
+
+/**
+ * Frases que EMPIEZAN como lo transcrito (autocompletado): con al menos
+ * 2 letras y sin ser ya la frase completa. Máximo `max` sugerencias.
+ */
+export function sugerirFrases(
+  textoTranscrito: string,
+  frases: readonly string[],
+  max = 3,
+): string[] {
+  const clave = normalizarFrase(textoTranscrito);
+  if (clave.length < 2) return [];
+  const salida: string[] = [];
+  for (const frase of frases) {
+    const claveFrase = normalizarFrase(frase);
+    if (claveFrase.length > clave.length && claveFrase.startsWith(clave)) {
+      salida.push(frase);
+      if (salida.length >= max) break;
+    }
+  }
+  return salida;
 }
