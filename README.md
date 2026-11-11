@@ -12,7 +12,7 @@ en voz alta**.
 
 ## Requisitos
 
-- Node.js 18+ y npm.
+- Node.js 24 (ver `.nvmrc`; mínimo 22.22) y npm.
 - Navegador moderno: **Chrome, Edge o Firefox** (Web Audio API + micrófono).
 - El micrófono exige **contexto seguro**: `https://` o `http://localhost`
   (`npm run dev` ya sirve en localhost).
