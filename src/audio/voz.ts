@@ -17,9 +17,7 @@ export interface VozDisponible {
  * ni altavoz). Prefiere es-ES, luego cualquier es-*, si no hay, null
  * (= voz por defecto del sistema).
  */
-export function elegirVozEspanola(
-  voces: readonly VozDisponible[],
-): number {
+export function elegirVozEspanola(voces: readonly VozDisponible[]): number {
   let respaldo = -1;
   for (let i = 0; i < voces.length; i += 1) {
     const voz = voces[i];
@@ -40,9 +38,7 @@ export function elegirVozEspanola(
  */
 export function textoParaVoz(texto: string): string {
   return texto.replace(/[A-ZÁÉÍÓÚÜÑ]+/g, (palabra) =>
-    palabra.length <= 1
-      ? palabra
-      : (palabra[0] ?? '') + palabra.slice(1).toLowerCase(),
+    palabra.length <= 1 ? palabra : (palabra[0] ?? '') + palabra.slice(1).toLowerCase(),
   );
 }
 
@@ -64,9 +60,7 @@ export function listarVocesEspanolas(): SpeechSynthesisVoice[] {
 
 /** ¿Hay síntesis de voz en este navegador? */
 export function hayVoz(): boolean {
-  return (
-    typeof window !== 'undefined' && 'speechSynthesis' in window
-  );
+  return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
 
 /**

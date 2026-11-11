@@ -35,7 +35,10 @@ function acotar(valor: unknown, min: number, max: number, defecto: number): numb
 
 /** Convierte cualquier valor guardado en ajustes válidos (puro, testeable). */
 export function sanearAjustes(crudo: unknown): Ajustes {
-  const o = (typeof crudo === 'object' && crudo !== null ? crudo : {}) as Record<string, unknown>;
+  const o = (typeof crudo === 'object' && crudo !== null ? crudo : {}) as Record<
+    string,
+    unknown
+  >;
   return {
     duracionNotaMs: acotar(
       o['duracionNotaMs'],

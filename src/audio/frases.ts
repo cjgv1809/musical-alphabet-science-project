@@ -45,10 +45,7 @@ export function buscarFrase(
 ): string | null {
   const clave = normalizarFrase(textoTranscrito);
   if (clave.length === 0) return null;
-  for (const texto of [
-    ...FRASES_ESENCIALES.map((f) => f.texto),
-    ...personalizadas,
-  ]) {
+  for (const texto of [...FRASES_ESENCIALES.map((f) => f.texto), ...personalizadas]) {
     if (normalizarFrase(texto) === clave) return texto;
   }
   return null;

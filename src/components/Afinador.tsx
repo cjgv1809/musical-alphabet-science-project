@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { MutableRefObject } from 'react';
 import type { LecturaTono } from '../audio/melodia.ts';
 import { obtenerNombreNota } from '../audio/cromatico.ts';
 import estilos from './InstrumentoPanel.module.css';
@@ -25,14 +24,15 @@ interface Vista {
  * Tiene estado propio y solo se actualiza si cambia lo que se ve.
  */
 export default function Afinador({
-  receptor,
+  registrar,
 }: {
-  receptor: MutableRefObject<((lectura: LecturaTono | null) => void) | null>;
+  /** Entrega al panel la función que actualiza el afinador (null al desmontar). */
+  registrar: (receptor: ((lectura: LecturaTono | null) => void) | null) => void;
 }): React.JSX.Element {
   const [vista, setVista] = useState<Vista | null>(null);
 
   useEffect(() => {
-    receptor.current = (lectura) => {
+    registrar((lectura) => {
       if (lectura === null) {
         setVista((anterior) => (anterior === null ? anterior : null));
         return;
@@ -46,17 +46,16 @@ export default function Afinador({
           ? anterior
           : { simbolo: lectura.simbolo, cents, confirmada: lectura.confirmada },
       );
-    };
-    return () => {
-      receptor.current = null;
-    };
-  }, [receptor]);
+    });
+    return () => registrar(null);
+  }, [registrar]);
 
   const afinada = vista !== null && Math.abs(vista.cents) <= AFINADA_CENTS;
   const posicion =
     vista === null
       ? 50
-      : 50 + (Math.max(-RANGO_CENTS, Math.min(RANGO_CENTS, vista.cents)) / RANGO_CENTS) * 50;
+      : 50 +
+        (Math.max(-RANGO_CENTS, Math.min(RANGO_CENTS, vista.cents)) / RANGO_CENTS) * 50;
   const nombre = vista === null ? null : obtenerNombreNota(vista.simbolo);
   const etiqueta =
     vista === null
@@ -74,22 +73,26 @@ export default function Afinador({
           {vista === null ? '·' : vista.simbolo === ' ' ? '␣' : vista.simbolo}
         </span>
         <span className={estilos.afinadorNombre}>{nombre ?? ''}</span>
-        {vista?.confirmada === true && (
-          <span className={estilos.afinadorOk}>✓</span>
-        )}
+        {vista?.confirmada === true && <span className={estilos.afinadorOk}>✓</span>}
       </div>
       <div className={estilos.afinadorBarra}>
         <span className={estilos.afinadorCentro} />
         <span
           className={`${estilos.afinadorAguja} ${
-            vista === null ? estilos.afinadorInactiva : afinada ? estilos.afinadorBien : ''
+            vista === null
+              ? estilos.afinadorInactiva
+              : afinada
+                ? estilos.afinadorBien
+                : ''
           }`}
           style={{ left: `${posicion}%` }}
         />
       </div>
       <div className={estilos.afinadorTexto}>
         {etiqueta}
-        {vista !== null && !afinada && ` (${vista.cents > 0 ? '+' : ''}${vista.cents} cents)`}
+        {vista !== null &&
+          !afinada &&
+          ` (${vista.cents > 0 ? '+' : ''}${vista.cents} cents)`}
       </div>
     </div>
   );

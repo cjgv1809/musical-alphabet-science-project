@@ -96,12 +96,11 @@ export function estimarFrecuenciaFundamental(
 
   // 4. Interpolación parabólica (estándar): ajusta una parábola a los
   // tres puntos del valle y corrige la fracción de muestra.
-  const y0 = norm[tauEst - 1] ?? (norm[tauEst] ?? 0);
+  const y0 = norm[tauEst - 1] ?? norm[tauEst] ?? 0;
   const y1 = norm[tauEst] ?? 0;
-  const y2 = norm[tauEst + 1] ?? (norm[tauEst] ?? 0);
+  const y2 = norm[tauEst + 1] ?? norm[tauEst] ?? 0;
   const denominador = y0 + y2 - 2 * y1;
-  const correccion =
-    denominador !== 0 ? (0.5 * (y0 - y2)) / denominador : 0;
+  const correccion = denominador !== 0 ? (0.5 * (y0 - y2)) / denominador : 0;
   const tauInterp = tauEst + Math.max(-1, Math.min(1, correccion));
 
   const claridad = Math.max(0, Math.min(1, 1 - y1));

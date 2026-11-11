@@ -25,15 +25,17 @@ npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
 npm run test     # tests unitarios (Vitest, 28 tests)
 npm run typecheck # TypeScript estricto
+npm run lint      # ESLint (React hooks + accesibilidad JSX)
+npm run format    # Prettier (formatea todo); format:check solo comprueba
 npm run build    # compilación de producción
 ```
 
 ## Cómo usarla
 
-1. **Tocar melodía** 🎹: escribe el mensaje (A–Z y signos . , ? ! ¿ ¡) y pulsa *Tocar
-   melodía*. Cada letra suena 500 ms como un seno puro en su nota
+1. **Tocar melodía** 🎹: escribe el mensaje (A–Z y signos . , ? ! ¿ ¡) y pulsa _Tocar
+   melodía_. Cada letra suena 500 ms como un seno puro en su nota
    cromática; la nota actual se muestra en grande con su nombre y Hz.
-2. **Escuchar melodía** 🎧: pulsa *Escuchar melodía* y toca las notas con
+2. **Escuchar melodía** 🎧: pulsa _Escuchar melodía_ y toca las notas con
    la guitarra, flauta o voz (una cada vez, sostenida ~500 ms, afinada).
    Las letras aparecen en vivo con la SNR en dB.
 3. **Frases que hablan** 🔊: al deletrear una frase esencial (HOLA, SÍ, NO,
@@ -52,14 +54,14 @@ npm run build    # compilación de producción
 2. Abre en el móvil la URL **Network** que muestra la terminal
    (ej. `https://192.168.1.35:5173`). El HTTPS es necesario: el micrófono
    no funciona por `http` en red local.
-3. Acepta el aviso de certificado autofirmado (Android: *Avanzado → Continuar*;
+3. Acepta el aviso de certificado autofirmado (Android: _Avanzado → Continuar_;
    en iPhone puede no bastar — en ese caso usa un túnel como `ngrok http 5173`).
-4. Listo: un aparato *toca* y el otro *escucha*. Sin guitarra: silba o
+4. Listo: un aparato _toca_ y el otro _escucha_. Sin guitarra: silba o
    tararea notas sostenidas, o usa un generador de tonos (440 Hz = M).
 
 ## Si no transcribe (diagnóstico en 5 pasos) 🔧
 
-1. **¿Llega sonido al micro?** Con *Escuchar melodía* activo, aplaude cerca
+1. **¿Llega sonido al micro?** Con _Escuchar melodía_ activo, aplaude cerca
    del móvil: la SNR debe moverse. Si no, revisa permiso de micro y HTTPS.
 2. **¿Llegan las notas?** Genera 440 Hz en otro móvil: debe aparecer la M.
    Si no, sube el volumen y acerca a 20–50 cm.
@@ -67,7 +69,7 @@ npm run build    # compilación de producción
    semitono). Usa un afinador para comprobar tu emisión.
 4. **¿Saliste de la app y ya no oye?** Los móviles suspenden el audio en
    segundo plano; al volver, la app reanuda sola. Si no revive, pulsa
-   *Dejar de escuchar* y *Escuchar melodía* de nuevo.
+   _Dejar de escuchar_ y _Escuchar melodía_ de nuevo.
 5. **¿Rasgueas acordes o tocas muy rápido?** La app es monofónica (como una
    flauta): una sola cuerda por vez, sostenida ~0.5 s, con pequeña pausa
    entre notas. Un acorde simultáneo no da letras falsas —da silencio— y
@@ -88,21 +90,21 @@ npm run build    # compilación de producción
 
 ## Tabla de notas (LA3 = 220 Hz)
 
-| Letra | Nota | Hz | Letra | Nota | Hz |
-|---|---|---|---|---|---|
-| `A` | LA3 | 220.00 | `N` | LA#4 | 466.16 |
-| `B` | LA#3 | 233.08 | `O` | SI4 | 493.88 |
-| `C` | SI3 | 246.94 | `P` | DO5 | 523.25 |
-| `D` | DO4 | 261.63 | `Q` | DO#5 | 554.37 |
-| `E` | DO#4 | 277.18 | `R` | RE5 | 587.33 |
-| `F` | RE4 | 293.66 | `S` | RE#5 | 622.25 |
-| `G` | RE#4 | 311.13 | `T` | MI5 | 659.26 |
-| `H` | MI4 | 329.63 | `U` | FA5 | 698.46 |
-| `I` | FA4 | 349.23 | `V` | FA#5 | 739.99 |
-| `J` | FA#4 | 369.99 | `W` | SOL5 | 783.99 |
-| `K` | SOL4 | 392.00 | `X` | SOL#5 | 830.61 |
-| `L` | SOL#4 | 415.30 | `Y` | LA5 | 880.00 |
-| `M` | LA4 | 440.00 | `Z` | LA#5 | 932.33 |
+| Letra | Nota  | Hz     | Letra | Nota  | Hz     |
+| ----- | ----- | ------ | ----- | ----- | ------ |
+| `A`   | LA3   | 220.00 | `N`   | LA#4  | 466.16 |
+| `B`   | LA#3  | 233.08 | `O`   | SI4   | 493.88 |
+| `C`   | SI3   | 246.94 | `P`   | DO5   | 523.25 |
+| `D`   | DO4   | 261.63 | `Q`   | DO#5  | 554.37 |
+| `E`   | DO#4  | 277.18 | `R`   | RE5   | 587.33 |
+| `F`   | RE4   | 293.66 | `S`   | RE#5  | 622.25 |
+| `G`   | RE#4  | 311.13 | `T`   | MI5   | 659.26 |
+| `H`   | MI4   | 329.63 | `U`   | FA5   | 698.46 |
+| `I`   | FA4   | 349.23 | `V`   | FA#5  | 739.99 |
+| `J`   | FA#4  | 369.99 | `W`   | SOL5  | 783.99 |
+| `K`   | SOL4  | 392.00 | `X`   | SOL#5 | 830.61 |
+| `L`   | SOL#4 | 415.30 | `Y`   | LA5   | 880.00 |
+| `M`   | LA4   | 440.00 | `Z`   | LA#5  | 932.33 |
 
 **Signos de puntuación** (grave, posiciones fáciles: cuerdas al aire y
 trastes 1–7). Se tocan como **nota sola** (ej. `.` = cuerda SOL al aire).
@@ -110,14 +112,14 @@ Ojo probado en laboratorio: un acorde rasgueado simultáneo NO se lee
 (el detector monofónico no ve tono claro y la app avisa); si quieres
 arpegiar, hazlo lento cuerda por cuerda o apaga las demás con la palma:
 
-| Signo | Nota (bajo) | Hz |
-|---|---|---|
-| `.` | RE#3 | 155.56 |
-| `,` | MI3 | 164.81 |
-| `?` | FA3 | 174.61 |
-| `!` | FA#3 | 185.00 |
-| `¿` | SOL3 | 196.00 |
-| `¡` | SOL#3 | 207.65 |
+| Signo | Nota (bajo) | Hz     |
+| ----- | ----------- | ------ |
+| `.`   | RE#3        | 155.56 |
+| `,`   | MI3         | 164.81 |
+| `?`   | FA3         | 174.61 |
+| `!`   | FA#3        | 185.00 |
+| `¿`   | SOL3        | 196.00 |
+| `¡`   | SOL#3       | 207.65 |
 
 **Espacio = RE3 (146.83 Hz, cuerda RE al aire).** El silencio no se oye,
 así que el espacio tiene nota propia; sin ella las palabras se pegaban
@@ -147,13 +149,13 @@ mínimos → una emisión por nota sostenida.
 
 ### Calibración
 
-| Parámetro | Valor |
-|---|---|
-| Ventana / tick | 1024 muestras / 40 ms |
-| Búsqueda YIN | 120–1500 Hz, umbral 0.15, RMS mín. 0.01 |
-| Tolerancia | ±45 cents |
-| Confirmación | 2 ventanas + 50 ms |
-| Emisión | 500 ms por nota + 60 ms de pausa |
+| Parámetro      | Valor                                   |
+| -------------- | --------------------------------------- |
+| Ventana / tick | 1024 muestras / 40 ms                   |
+| Búsqueda YIN   | 120–1500 Hz, umbral 0.15, RMS mín. 0.01 |
+| Tolerancia     | ±45 cents                               |
+| Confirmación   | 2 ventanas + 50 ms                      |
+| Emisión        | 500 ms por nota + 60 ms de pausa        |
 
 ## Decisiones técnicas (justificadas)
 
@@ -166,18 +168,18 @@ mínimos → una emisión por nota sostenida.
 
 ## Migración a React Native + Expo (fase futura)
 
-| Módulo | Estado |
-|---|---|
+| Módulo                                             | Estado                                                   |
+| -------------------------------------------------- | -------------------------------------------------------- |
 | `cromatico.ts`, `tonoFundamental.ts`, `melodia.ts` | ✅ 100 % reutilizables (`Float32Array` existe en Hermes) |
-| `frases.ts`, `utils/`, `types/` | ✅ reutilizables |
-| Tests Vitest | ✅ se ejecutan igual |
+| `frases.ts`, `utils/`, `types/`                    | ✅ reutilizables                                         |
+| Tests Vitest                                       | ✅ se ejecutan igual                                     |
 
-| Web (actual) | React Native + Expo |
-|---|---|
-| `instrumento.ts` (Web Audio nativo) | `expo-audio`: generar el buffer PCM de la nota (envolvente incluida) |
+| Web (actual)                                   | React Native + Expo                                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `instrumento.ts` (Web Audio nativo)            | `expo-audio`: generar el buffer PCM de la nota (envolvente incluida)                      |
 | `escucha.ts` (`getUserMedia` + `AudioContext`) | grabación PCM mono 44100 Hz → ventanas de 1024 cada 40 ms → `DetectorMelodia` sin cambios |
-| `voz.ts` (SpeechSynthesis) | `expo-speech` (misma idea, una línea por frase) |
-| CSS Modules | `StyleSheet` de RN |
+| `voz.ts` (SpeechSynthesis)                     | `expo-speech` (misma idea, una línea por frase)                                           |
+| CSS Modules                                    | `StyleSheet` de RN                                                                        |
 
 Recomendaciones: copiar `audio/` (menos `instrumento`/`escucha`), correr
 `npm run test`, y probar en dispositivo físico (el emulador distorsiona

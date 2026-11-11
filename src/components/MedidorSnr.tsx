@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { MutableRefObject } from 'react';
 import type { NivelSenal } from '../types/index.ts';
 import estilos from './InstrumentoPanel.module.css';
 
@@ -12,19 +11,17 @@ import estilos from './InstrumentoPanel.module.css';
  * este párrafo, y solo cuando cambia el valor entero en dB.
  */
 export default function MedidorSnr({
-  receptor,
+  registrar,
 }: {
-  /** El panel llama a `receptor.current(nivel)` en cada medición. */
-  receptor: MutableRefObject<((nivel: NivelSenal) => void) | null>;
+  /** Entrega al panel la función que actualiza el medidor (null al desmontar). */
+  registrar: (receptor: ((nivel: NivelSenal) => void) | null) => void;
 }): React.JSX.Element {
   const [snrDb, setSnrDb] = useState(0);
 
   useEffect(() => {
-    receptor.current = (nivel) => setSnrDb(Math.round(nivel.snrDb));
-    return () => {
-      receptor.current = null;
-    };
-  }, [receptor]);
+    registrar((nivel) => setSnrDb(Math.round(nivel.snrDb)));
+    return () => registrar(null);
+  }, [registrar]);
 
   return (
     <p className={estilos.snr}>

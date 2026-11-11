@@ -1,11 +1,5 @@
-import {
-  normalizarSimboloCromatico,
-  obtenerFrecuenciaNota,
-} from './cromatico.ts';
-import {
-  DURACION_SIMBOLO_MS,
-  PAUSA_ENTRE_SIMBOLOS_MS,
-} from '../utils/constants.ts';
+import { normalizarSimboloCromatico, obtenerFrecuenciaNota } from './cromatico.ts';
+import { DURACION_SIMBOLO_MS, PAUSA_ENTRE_SIMBOLOS_MS } from '../utils/constants.ts';
 
 /**
  * Emisor de melodías: UNA nota por letra, con Web Audio nativo.
@@ -124,8 +118,7 @@ export async function tocarMelodia(
   await asegurarAudioListo();
   sonandoMelodia = true;
   detenerMelodia = false;
-  const detenido = (): boolean =>
-    detenerMelodia || debeDetener?.() === true;
+  const detenido = (): boolean => detenerMelodia || debeDetener?.() === true;
   try {
     let indiceVisible = 0;
     for (const caracter of mensaje) {

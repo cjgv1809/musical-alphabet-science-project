@@ -4,7 +4,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
-  box-shadow: var(--shadow), inset 0 4px 0 var(--accent);
+  box-shadow:
+    var(--shadow),
+    inset 0 4px 0 var(--accent);
 }
 
 .ayuda {
@@ -53,7 +55,9 @@
   background: var(--field);
   color: var(--ink);
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 @media (hover: hover) {

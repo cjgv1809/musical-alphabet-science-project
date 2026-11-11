@@ -46,10 +46,7 @@ describe('tonoFundamental (YIN simplificado)', () => {
 
   it('la "guitarra" da la misma fundamental que el seno (timbre libre)', () => {
     for (const f of [220, 329.63, 523.25]) {
-      const est = estimarFrecuenciaFundamental(
-        sintetizar(f, GUITARRA),
-        SAMPLE_RATE,
-      );
+      const est = estimarFrecuenciaFundamental(sintetizar(f, GUITARRA), SAMPLE_RATE);
       expect(est).not.toBe(null);
       // Sin error de octava: debe ser f, no 2f ni f/2.
       expect(Math.abs((est?.frecuencia ?? 0) - f) / f).toBeLessThan(0.02);
@@ -60,20 +57,13 @@ describe('tonoFundamental (YIN simplificado)', () => {
     for (const f of [155.56, 196.0, 207.65]) {
       const seno = estimarFrecuenciaFundamental(sintetizar(f), SAMPLE_RATE);
       expect(Math.abs((seno?.frecuencia ?? 0) - f) / f).toBeLessThan(0.02);
-      const guitarra = estimarFrecuenciaFundamental(
-        sintetizar(f, GUITARRA),
-        SAMPLE_RATE,
-      );
-      expect(
-        Math.abs((guitarra?.frecuencia ?? 0) - f) / f,
-      ).toBeLessThan(0.03);
+      const guitarra = estimarFrecuenciaFundamental(sintetizar(f, GUITARRA), SAMPLE_RATE);
+      expect(Math.abs((guitarra?.frecuencia ?? 0) - f) / f).toBeLessThan(0.03);
     }
   });
 
   it('silencio y ruido no inventan tonos', () => {
-    expect(
-      estimarFrecuenciaFundamental(new Float32Array(N), SAMPLE_RATE),
-    ).toBe(null);
+    expect(estimarFrecuenciaFundamental(new Float32Array(N), SAMPLE_RATE)).toBe(null);
     // Ruido blanco: sin periodicidad clara → null.
     const ruido = new Float32Array(N);
     let semilla = 12345;
@@ -85,11 +75,7 @@ describe('tonoFundamental (YIN simplificado)', () => {
   });
 
   it('protege casos borde', () => {
-    expect(
-      estimarFrecuenciaFundamental(new Float32Array(100), SAMPLE_RATE),
-    ).toBe(null);
-    expect(
-      estimarFrecuenciaFundamental(sintetizar(440), 0),
-    ).toBe(null);
+    expect(estimarFrecuenciaFundamental(new Float32Array(100), SAMPLE_RATE)).toBe(null);
+    expect(estimarFrecuenciaFundamental(sintetizar(440), 0)).toBe(null);
   });
 });

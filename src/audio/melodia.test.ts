@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DetectorMelodia } from './melodia.ts';
-import {
-  normalizarSimboloCromatico,
-  obtenerFrecuenciaNota,
-} from './cromatico.ts';
+import { normalizarSimboloCromatico, obtenerFrecuenciaNota } from './cromatico.ts';
 import { TAMANO_VENTANA } from '../utils/constants.ts';
 
 /**
@@ -77,8 +74,7 @@ function sintetizarAcorde(
     for (const f of frecuencias) {
       for (let k = 0; k < parciales.length; k += 1) {
         valor +=
-          (parciales[k] ?? 0) *
-          Math.sin((2 * Math.PI * f * (k + 1) * i) / SAMPLE_RATE);
+          (parciales[k] ?? 0) * Math.sin((2 * Math.PI * f * (k + 1) * i) / SAMPLE_RATE);
       }
     }
     muestras[i] = (0.3 * valor) / frecuencias.length;
@@ -87,16 +83,9 @@ function sintetizarAcorde(
 }
 
 /** Procesa una señal ventana a ventana como el motor en vivo. */
-function procesarVentanas(
-  det: DetectorMelodia,
-  senal: Float32Array,
-): void {
+function procesarVentanas(det: DetectorMelodia, senal: Float32Array): void {
   const paso = Math.round((TICK_MS * SAMPLE_RATE) / 1000);
-  for (
-    let offset = 0;
-    offset + TAMANO_VENTANA <= senal.length;
-    offset += paso
-  ) {
+  for (let offset = 0; offset + TAMANO_VENTANA <= senal.length; offset += paso) {
     const ventana = senal.slice(offset, offset + TAMANO_VENTANA);
     det.procesar(ventana, SAMPLE_RATE, (offset / SAMPLE_RATE) * 1000);
   }
@@ -106,11 +95,7 @@ function transcribir(senal: Float32Array): string {
   const detector = new DetectorMelodia();
   const paso = Math.round((TICK_MS * SAMPLE_RATE) / 1000);
   let texto = '';
-  for (
-    let offset = 0;
-    offset + TAMANO_VENTANA <= senal.length;
-    offset += paso
-  ) {
+  for (let offset = 0; offset + TAMANO_VENTANA <= senal.length; offset += paso) {
     const ventana = senal.slice(offset, offset + TAMANO_VENTANA);
     const ahoraMs = (offset / SAMPLE_RATE) * 1000;
     const resultado = detector.procesar(ventana, SAMPLE_RATE, ahoraMs);
@@ -127,21 +112,15 @@ describe('melodia (instrumento → texto)', () => {
   });
 
   it('"HOLA" con timbre de guitarra se transcribe IGUAL', () => {
-    expect(transcribir(sintetizarMelodia('HOLA', 500, 60, GUITARRA))).toBe(
-      'HOLA',
-    );
+    expect(transcribir(sintetizarMelodia('HOLA', 500, 60, GUITARRA))).toBe('HOLA');
   });
 
   it('nota repetida con pausa ("CASA") emite dos veces la A', () => {
-    expect(transcribir(sintetizarMelodia('CASA', 500, 60, GUITARRA))).toBe(
-      'CASA',
-    );
+    expect(transcribir(sintetizarMelodia('CASA', 500, 60, GUITARRA))).toBe('CASA');
   });
 
   it('"HOLA." con timbre de guitarra incluye el punto (nota grave)', () => {
-    expect(transcribir(sintetizarMelodia('HOLA.', 500, 60, GUITARRA))).toBe(
-      'HOLA.',
-    );
+    expect(transcribir(sintetizarMelodia('HOLA.', 500, 60, GUITARRA))).toBe('HOLA.');
   });
 
   it('"HOLA COMO" con timbre de guitarra conserva el espacio', () => {

@@ -33,8 +33,32 @@ export const FRECUENCIA_BASE_CROMATICA = 220;
 
 /** Letras cubiertas por el modo instrumento (A–Z). */
 export const SIMBOLOS_CROMATICOS: readonly string[] = [
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
 ] as const;
 
 /**
@@ -42,7 +66,12 @@ export const SIMBOLOS_CROMATICOS: readonly string[] = [
  * `.` = RE#3, `,` = MI3, `?` = FA3, `!` = FA#3, `¿` = SOL3, `¡` = SOL#3.
  */
 export const SIMBOLOS_PUNTUACION: readonly string[] = [
-  '.', ',', '?', '!', '¿', '¡',
+  '.',
+  ',',
+  '?',
+  '!',
+  '¿',
+  '¡',
 ] as const;
 
 /** Índice cromático más grave: ESPACIO = RE3 (146.83 Hz). */
@@ -52,14 +81,23 @@ export const INDICE_MINIMO = -7;
 export const TOLERANCIA_CENTS = 45;
 
 const NOMBRES_SEMITONO: readonly string[] = [
-  'LA', 'LA#', 'SI', 'DO', 'DO#', 'RE',
-  'RE#', 'MI', 'FA', 'FA#', 'SOL', 'SOL#',
+  'LA',
+  'LA#',
+  'SI',
+  'DO',
+  'DO#',
+  'RE',
+  'RE#',
+  'MI',
+  'FA',
+  'FA#',
+  'SOL',
+  'SOL#',
 ] as const;
 
 /** Frecuencia exacta (Hz) del semitono n.º i (0 = LA3). */
 export function frecuenciaSemitono(indice: number): number {
-  const frecuencia =
-    FRECUENCIA_BASE_CROMATICA * Math.pow(2, indice / 12);
+  const frecuencia = FRECUENCIA_BASE_CROMATICA * Math.pow(2, indice / 12);
   return Math.round(frecuencia * 100) / 100;
 }
 
@@ -141,8 +179,7 @@ export function notaMasCercana(
   toleranciaCents: number = TOLERANCIA_CENTS,
 ): NotaCercana | null {
   if (!Number.isFinite(frecuencia) || frecuencia <= 0) return null;
-  const flotante =
-    12 * Math.log2(frecuencia / FRECUENCIA_BASE_CROMATICA);
+  const flotante = 12 * Math.log2(frecuencia / FRECUENCIA_BASE_CROMATICA);
   const indice = Math.round(flotante);
   if (indice < INDICE_MINIMO || indice >= SIMBOLOS_CROMATICOS.length) {
     return null;

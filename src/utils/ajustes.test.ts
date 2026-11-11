@@ -15,7 +15,11 @@ describe('ajustes', () => {
   });
 
   it('conserva valores válidos', () => {
-    const a = sanearAjustes({ duracionNotaMs: 700, velocidadVoz: 1, vozNombre: 'Paulina' });
+    const a = sanearAjustes({
+      duracionNotaMs: 700,
+      velocidadVoz: 1,
+      vozNombre: 'Paulina',
+    });
     expect(a).toEqual({ duracionNotaMs: 700, velocidadVoz: 1, vozNombre: 'Paulina' });
   });
 });

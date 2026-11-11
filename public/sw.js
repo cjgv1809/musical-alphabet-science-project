@@ -18,8 +18,11 @@ self.addEventListener('install', (evento) => {
       const html = await respuesta.clone().text();
       await cache.put(base, respuesta);
       // Rutas relativas (./assets/xxx.js) resueltas contra el alcance.
-      const recursos = [...html.matchAll(/(?:src|href)="(\.?\/?(?:assets\/|favicon|manifest|icon)[^"]*)"/g)]
-        .map((m) => new URL(m[1], base).href);
+      const recursos = [
+        ...html.matchAll(
+          /(?:src|href)="(\.?\/?(?:assets\/|favicon|manifest|icon)[^"]*)"/g,
+        ),
+      ].map((m) => new URL(m[1], base).href);
       await cache.addAll([...new Set(recursos)]);
       await self.skipWaiting();
     })(),
@@ -70,6 +73,8 @@ self.addEventListener('fetch', (evento) => {
         void caches.open(CACHE).then((c) => c.put(peticion, copia));
         return red;
       })
-      .catch(() => caches.match(peticion).then((g) => g || caches.match(self.registration.scope))),
+      .catch(() =>
+        caches.match(peticion).then((g) => g || caches.match(self.registration.scope)),
+      ),
   );
 });

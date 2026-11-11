@@ -30,11 +30,14 @@ export default class ErrorBoundary extends Component<Props, Estado> {
   override render(): ReactNode {
     if (!this.state.fallo) return this.props.children;
     return (
-      <div role="alert" style={{ maxWidth: '32rem', margin: '3rem auto', padding: '1rem' }}>
+      <div
+        role="alert"
+        style={{ maxWidth: '32rem', margin: '3rem auto', padding: '1rem' }}
+      >
         <h1>Algo salió mal</h1>
         <p>
-          La aplicación tuvo un problema inesperado. Tus ajustes y frases
-          guardadas siguen a salvo. Recarga para volver a empezar.
+          La aplicación tuvo un problema inesperado. Tus ajustes y frases guardadas siguen
+          a salvo. Recarga para volver a empezar.
         </p>
         <button
           type="button"

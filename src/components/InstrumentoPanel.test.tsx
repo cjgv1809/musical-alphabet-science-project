@@ -48,7 +48,9 @@ describe('InstrumentoPanel (escucha simulada)', () => {
     await empezar();
     tocar('HOLA');
     act(() => screen.getByRole('button', { name: /borrar la última letra/i }).click());
-    expect(screen.getByRole('log', { name: /melodía transcrita/i })).toHaveTextContent(/^HOL$/);
+    expect(screen.getByRole('log', { name: /melodía transcrita/i })).toHaveTextContent(
+      /^HOL$/,
+    );
   });
 
   it('espera un silencio antes de hablar: NO no suena si sigue NOCHE', async () => {

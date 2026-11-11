@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
 import {
   FRASES_ESENCIALES,
@@ -45,12 +45,21 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const [escuchando, setEscuchando] = useState(false);
   const [notaActual, setNotaActual] = useState<string | null>(null);
   const [texto, setTexto] = useState('');
-  const [fraseDetectada, setFraseDetectada] = useState<string | null>(null);
   const [confuso, setConfuso] = useState(false);
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
   const receptorTonoRef = useRef<((lectura: LecturaTono | null) => void) | null>(null);
   const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
+  // Registro de los receptores (referencias estables para los efectos hijos).
+  const registrarTono = useCallback(
+    (receptor: ((lectura: LecturaTono | null) => void) | null) => {
+      receptorTonoRef.current = receptor;
+    },
+    [],
+  );
+  const registrarNivel = useCallback((receptor: ((nivel: NivelSenal) => void) | null) => {
+    receptorNivelRef.current = receptor;
+  }, []);
   const [nuevaFrase, setNuevaFrase] = useState('');
   const { ajustes, setAjustes, ajustesRef } = useAjustes();
   const voces = useVocesEspanolas();
@@ -61,14 +70,19 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const detencionRef = useRef(false);
   const ultimoHabladoRef = useRef('');
 
+  /** Frase esencial o propia que equivale a lo transcrito (derivada, sin estado). */
+  const fraseDetectada = useMemo(
+    () => buscarFrase(texto, personalizadas),
+    [texto, personalizadas],
+  );
+
   // Fraseario: si lo transcrito equivale a una frase esencial, se habla.
   // (Se compara sin espacios: la guitarra no los emite.)
   // Se espera un momento sin notas nuevas antes de hablar: "NO" no debe
   // sonar si la persona sigue deletreando "NOCHE". Si el texto cambia, el
   // temporizador se cancela y se reinicia.
   useEffect(() => {
-    const frase = buscarFrase(texto, personalizadas);
-    setFraseDetectada(frase);
+    const frase = fraseDetectada;
     // Texto nuevo (distinto al último hablado): permite repetir la misma
     // frase más tarde, p. ej. AGUA … AGUA.
     if (ultimoHabladoRef.current !== texto) ultimoHabladoRef.current = '';
@@ -82,7 +96,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       }
     }, RETRASO_FRASE_MS);
     return () => window.clearTimeout(id);
-  }, [texto, personalizadas]);
+  }, [texto, fraseDetectada, hablarConPausa]);
 
   useEffect(() => {
     return () => {
@@ -113,7 +127,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
     }
   };
 
-  const empezarEscucha = async (): Promise<void> => {
+  const empezarEscucha = useCallback(async (): Promise<void> => {
     if (motorEscucha.estaActivo()) return;
     setErrorLocal(null);
     try {
@@ -149,7 +163,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
         err instanceof Error ? err.message : 'No se pudo activar el micrófono.',
       );
     }
-  };
+  }, [pausaTranscripcionRef]);
 
   const detenerEscucha = (): void => {
     motorEscucha.detener();
@@ -178,7 +192,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
     };
     document.addEventListener('visibilitychange', alVolver);
     return () => document.removeEventListener('visibilitychange', alVolver);
-  }, []);
+  }, [empezarEscucha]);
 
   const textoCompartible = (): string => fraseDetectada ?? texto;
 
@@ -228,33 +242,30 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const limpiarTexto = (): void => {
     setTexto('');
     setConfuso(false);
-    setFraseDetectada(null);
     ultimoHabladoRef.current = '';
     callar();
   };
 
   const hablarTexto = (): void => {
     if (!hablarConPausa(fraseDetectada ?? texto)) {
-      setErrorLocal(
-        'Este navegador no tiene voz sintetizada: lee el texto en pantalla.',
-      );
+      setErrorLocal('Este navegador no tiene voz sintetizada: lee el texto en pantalla.');
     }
   };
 
   /** Secuencia de notas de una frase (para aprenderla en la guitarra). */
   const notasDe = (frase: string): string =>
-    [...normalizarFrase(frase)]
-      .map((c) => obtenerNombreNota(c) ?? '?')
-      .join(' · ');
+    [...normalizarFrase(frase)].map((c) => obtenerNombreNota(c) ?? '?').join(' · ');
 
   return (
     <section className={estilos.panel} aria-labelledby="titulo-instrumento">
-      <h2 id="titulo-instrumento">De la guitarra a las palabras <span aria-hidden="true">🎸</span></h2>
+      <h2 id="titulo-instrumento">
+        De la guitarra a las palabras <span aria-hidden="true">🎸</span>
+      </h2>
       <p className={estilos.ayuda}>
-        Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…):
-        toca la melodía aquí o con una guitarra/flauta/voz afinada, de una
-        nota cada vez. Si completas una frase esencial, la app la dice en voz
-        alta. Espacio = cuerda RE al aire (146.83 Hz).
+        Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…): toca la
+        melodía aquí o con una guitarra/flauta/voz afinada, de una nota cada vez. Si
+        completas una frase esencial, la app la dice en voz alta. Espacio = cuerda RE al
+        aire (146.83 Hz).
       </p>
 
       <label className={estilos.etiqueta} htmlFor="campo-melodia">
@@ -333,11 +344,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
         >
           <span aria-hidden="true">⌫</span> Borrar
         </button>
-        <button
-          type="button"
-          onClick={limpiarTexto}
-          disabled={texto.length === 0}
-        >
+        <button type="button" onClick={limpiarTexto} disabled={texto.length === 0}>
           Limpiar
         </button>
       </div>
@@ -371,7 +378,12 @@ export default function InstrumentoPanel(): React.JSX.Element {
             </span>
           )}
         </div>
-        <div className={estilos.resultado} role="log" aria-live="polite" aria-label="Melodía transcrita">
+        <div
+          className={estilos.resultado}
+          role="log"
+          aria-live="polite"
+          aria-label="Melodía transcrita"
+        >
           {texto.length === 0 ? (
             <span className={estilos.vacio}>
               {escuchando
@@ -382,8 +394,8 @@ export default function InstrumentoPanel(): React.JSX.Element {
             texto
           )}
         </div>
-        {escuchando && <Afinador receptor={receptorTonoRef} />}
-        {escuchando && <MedidorSnr receptor={receptorNivelRef} />}
+        {escuchando && <Afinador registrar={registrarTono} />}
+        {escuchando && <MedidorSnr registrar={registrarNivel} />}
       </div>
 
       {sugerencias.length > 0 && (
@@ -405,16 +417,16 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
       {fraseDetectada !== null && (
         <p className={estilos.fraseReconocida} role="status">
-          <span aria-hidden="true">✅</span> Frase reconocida: <strong>{fraseDetectada}</strong>
+          <span aria-hidden="true">✅</span> Frase reconocida:{' '}
+          <strong>{fraseDetectada}</strong>
         </p>
       )}
 
       {confuso && fraseDetectada === null && (
         <p className={estilos.aviso} role="status">
-          <span aria-hidden="true">🎸</span> Se oye sonido pero ninguna nota clara: toca de a{' '}
-          <strong>una sola cuerda</strong> por vez, despacio y cerca del
-          micro. Los acordes rasgueados no se leen (suenan varias notas a
-          la vez).
+          <span aria-hidden="true">🎸</span> Se oye sonido pero ninguna nota clara: toca
+          de a <strong>una sola cuerda</strong> por vez, despacio y cerca del micro. Los
+          acordes rasgueados no se leen (suenan varias notas a la vez).
         </p>
       )}
 
@@ -460,7 +472,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
             max={LIMITES.duracionNotaMs.max}
             step={LIMITES.duracionNotaMs.paso}
             value={ajustes.duracionNotaMs}
-            onChange={(e) => setAjustes({ ...ajustes, duracionNotaMs: Number(e.target.value) })}
+            onChange={(e) =>
+              setAjustes({ ...ajustes, duracionNotaMs: Number(e.target.value) })
+            }
           />
           <label htmlFor="ajuste-velocidad-voz">
             Velocidad de la voz: <strong>{ajustes.velocidadVoz.toFixed(2)}×</strong>
@@ -472,7 +486,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
             max={LIMITES.velocidadVoz.max}
             step={LIMITES.velocidadVoz.paso}
             value={ajustes.velocidadVoz}
-            onChange={(e) => setAjustes({ ...ajustes, velocidadVoz: Number(e.target.value) })}
+            onChange={(e) =>
+              setAjustes({ ...ajustes, velocidadVoz: Number(e.target.value) })
+            }
           />
           {voces.length > 0 && (
             <>
@@ -484,7 +500,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
               >
                 <option value="">Automática (mejor voz en español)</option>
                 {voces.map((nombre) => (
-                  <option key={nombre} value={nombre}>{nombre}</option>
+                  <option key={nombre} value={nombre}>
+                    {nombre}
+                  </option>
                 ))}
               </select>
             </>
@@ -513,7 +531,9 @@ export default function InstrumentoPanel(): React.JSX.Element {
         </div>
 
         <div className={estilos.nuevaFrase}>
-          <label htmlFor="nueva-frase">Añadir tu propia frase (nombre, medicación…)</label>
+          <label htmlFor="nueva-frase">
+            Añadir tu propia frase (nombre, medicación…)
+          </label>
           <div className={estilos.nuevaFraseFila}>
             <input
               id="nueva-frase"
@@ -526,7 +546,11 @@ export default function InstrumentoPanel(): React.JSX.Element {
               }}
               placeholder="Ej. Me llamo Ana"
             />
-            <button type="button" onClick={anadirFrase} disabled={nuevaFrase.trim() === ''}>
+            <button
+              type="button"
+              onClick={anadirFrase}
+              disabled={nuevaFrase.trim() === ''}
+            >
               Añadir
             </button>
           </div>

@@ -1,11 +1,7 @@
 import { TAMANO_VENTANA } from '../utils/constants.ts';
 import type { NivelSenal } from '../types/index.ts';
 import { calcularSnrDb, crearCadenaAntiRuido } from './noiseFilter.ts';
-import {
-  DetectorMelodia,
-  type DetectorDeSimbolos,
-  type LecturaTono,
-} from './melodia.ts';
+import { DetectorMelodia, type DetectorDeSimbolos, type LecturaTono } from './melodia.ts';
 
 /**
  * Motor de escucha: micrófono → filtro pasa-banda → detector en vivo.
@@ -120,10 +116,7 @@ export class MotorEscucha {
       // Algunos navegadores no aceptan estos ajustes: reintento simple.
       // (Si el fallo es de permiso o falta de micro, el segundo intento
       // falla igual y se muestra el mensaje amigable correspondiente.)
-      if (
-        error instanceof DOMException &&
-        error.name === 'OverconstrainedError'
-      ) {
+      if (error instanceof DOMException && error.name === 'OverconstrainedError') {
         try {
           stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         } catch (segundoError) {
@@ -190,11 +183,7 @@ export class MotorEscucha {
       snrDb: calcularSnrDb(rms, this.ruidoBase),
     });
 
-    const resultado = this.detector.procesar(
-      ventana,
-      this.obtenerSampleRate(),
-      ahora,
-    );
+    const resultado = this.detector.procesar(ventana, this.obtenerSampleRate(), ahora);
     this.callbacks.alTono?.(this.detector.leerTono?.() ?? null);
     if (resultado !== null) {
       this.callbacks.alConfirmar(resultado.simbolo, resultado.snrDb);

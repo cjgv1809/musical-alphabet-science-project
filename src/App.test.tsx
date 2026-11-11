@@ -16,11 +16,7 @@ describe('App (integración)', () => {
     expect(
       screen.getByRole('heading', { name: /de la guitarra a las palabras/i }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /tocar melodía/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /escuchar melodía/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /tocar melodía/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /escuchar melodía/i })).toBeInTheDocument();
   });
 });

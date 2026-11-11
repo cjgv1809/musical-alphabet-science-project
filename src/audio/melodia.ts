@@ -91,8 +91,7 @@ export class DetectorMelodia implements DetectorDeSimbolos {
     // se cuenta racha para el aviso de confusión (ver leerConfusion).
     const rms = rmsVentana(muestras);
     const estimacion = estimarFrecuenciaFundamental(muestras, sampleRate);
-    const nota =
-      estimacion === null ? null : notaMasCercana(estimacion.frecuencia);
+    const nota = estimacion === null ? null : notaMasCercana(estimacion.frecuencia);
     // Para el afinador: la nota más cercana aunque esté algo desafinada.
     const cercana =
       estimacion === null ? null : notaMasCercana(estimacion.frecuencia, 50);

@@ -29,9 +29,7 @@ export interface CadenaAntiRuido {
  * Crea la cadena pasa-banda: micrófono → pasa-altas (100 Hz) →
  * pasa-bajas (3000 Hz) → analizador.
  */
-export function crearCadenaAntiRuido(
-  contexto: AudioContext,
-): CadenaAntiRuido {
+export function crearCadenaAntiRuido(contexto: AudioContext): CadenaAntiRuido {
   const entrada = contexto.createGain();
   const salida = contexto.createGain();
 
