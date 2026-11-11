@@ -46,6 +46,22 @@ export function textoParaVoz(texto: string): string {
   );
 }
 
+/** Opciones de voz elegidas por el usuario. */
+export interface OpcionesVoz {
+  /** Velocidad (1 = normal). */
+  velocidad?: number;
+  /** Nombre exacto de una voz instalada; vacío = automática. */
+  vozNombre?: string;
+}
+
+/** Voces españolas instaladas (para el selector de ajustes). */
+export function listarVocesEspanolas(): SpeechSynthesisVoice[] {
+  if (!hayVoz()) return [];
+  return window.speechSynthesis
+    .getVoices()
+    .filter((v) => v.lang.toLowerCase().startsWith('es'));
+}
+
 /** ¿Hay síntesis de voz en este navegador? */
 export function hayVoz(): boolean {
   return (
@@ -60,7 +76,11 @@ export function hayVoz(): boolean {
  * app sepa cuándo puede volver a escuchar sin oírse a sí misma).
  * @returns false si no hay soporte (la UI muestra el texto igual).
  */
-export function hablar(texto: string, alTerminar?: () => void): boolean {
+export function hablar(
+  texto: string,
+  alTerminar?: () => void,
+  opciones: OpcionesVoz = {},
+): boolean {
   let terminado = false;
   const avisarFin = (): void => {
     if (!terminado) {
@@ -77,11 +97,16 @@ export function hablar(texto: string, alTerminar?: () => void): boolean {
     sintesis.cancel();
     const enunciado = new SpeechSynthesisUtterance(textoParaVoz(texto));
     enunciado.lang = 'es-ES';
-    enunciado.rate = 0.95; // un poco más lento: más claro.
+    enunciado.rate = opciones.velocidad ?? 0.95; // algo más lento: más claro.
     enunciado.onend = avisarFin;
     enunciado.onerror = avisarFin;
     const voces = sintesis.getVoices();
-    const indice = elegirVozEspanola(voces);
+    const elegida =
+      opciones.vozNombre === undefined || opciones.vozNombre === ''
+        ? undefined
+        : voces.find((v) => v.name === opciones.vozNombre);
+    const indice =
+      elegida !== undefined ? voces.indexOf(elegida) : elegirVozEspanola(voces);
     if (indice >= 0) {
       const voz = voces[indice];
       if (voz !== undefined) enunciado.voice = voz;

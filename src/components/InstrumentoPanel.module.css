@@ -311,3 +311,31 @@
   font-size: 0.9rem;
   color: var(--display-dim);
 }
+
+/* Ajustes. */
+.ajustes {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 24rem;
+  margin-top: 0.4rem;
+}
+
+.ajustes input[type='range'] {
+  width: 100%;
+  min-height: 44px;
+}
+
+.ajustes select,
+.ajustes button {
+  min-height: 44px;
+  font-size: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--field);
+  color: var(--ink);
+  padding: 0.4rem 0.6rem;
+}
+
+.ajustes button {
+  cursor: pointer;
+}

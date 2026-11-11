@@ -7,8 +7,15 @@ import {
   tocarMelodia,
 } from '../audio/instrumento.ts';
 import { DetectorMelodia, type LecturaTono } from '../audio/melodia.ts';
-import { callar, hablar, hayVoz } from '../audio/voz.ts';
+import { callar, hablar, hayVoz, listarVocesEspanolas } from '../audio/voz.ts';
 import { motorEscucha } from '../audio/escucha.ts';
+import {
+  AJUSTES_POR_DEFECTO,
+  LIMITES,
+  cargarAjustes,
+  guardarAjustes,
+  type Ajustes,
+} from '../utils/ajustes.ts';
 import type { NivelSenal } from '../types/index.ts';
 import Afinador from './Afinador.tsx';
 import MedidorSnr from './MedidorSnr.tsx';
@@ -41,6 +48,10 @@ export default function InstrumentoPanel(): React.JSX.Element {
   /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
   const receptorTonoRef = useRef<((lectura: LecturaTono | null) => void) | null>(null);
   const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
+  const [ajustes, setAjustes] = useState<Ajustes>(cargarAjustes);
+  const [voces, setVoces] = useState<string[]>([]);
+  /** Copia en ref para que los callbacks de larga vida lean lo último. */
+  const ajustesRef = useRef(ajustes);
   const detencionRef = useRef(false);
   /** El micro no transcribe mientras la app habla o toca (anti-eco). */
   const pausaTranscripcionRef = useRef(false);
@@ -71,6 +82,20 @@ export default function InstrumentoPanel(): React.JSX.Element {
   }, [texto]);
 
   useEffect(() => {
+    ajustesRef.current = ajustes;
+    guardarAjustes(ajustes);
+  }, [ajustes]);
+
+  // Las voces del sistema se cargan de forma asíncrona.
+  useEffect(() => {
+    if (!hayVoz()) return undefined;
+    const leer = (): void => setVoces(listarVocesEspanolas().map((v) => v.name));
+    leer();
+    window.speechSynthesis.addEventListener('voiceschanged', leer);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', leer);
+  }, []);
+
+  useEffect(() => {
     return () => {
       detencionRef.current = true;
       solicitarDetencionMelodia();
@@ -93,7 +118,10 @@ export default function InstrumentoPanel(): React.JSX.Element {
       window.clearTimeout(finVozTimerRef.current);
       pausaTranscripcionRef.current = false;
     };
-    const ok = hablar(textoVoz, liberar);
+    const ok = hablar(textoVoz, liberar, {
+      velocidad: ajustesRef.current.velocidadVoz,
+      vozNombre: ajustesRef.current.vozNombre,
+    });
     // Respaldo si `onend` no llega: mientras el navegador siga hablando se
     // espera (con tope), en vez de adivinar la duración por la longitud.
     const vigilar = (): void => {
@@ -123,6 +151,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
       await tocarMelodia(mensaje, {
         alIniciarNota: (simbolo) => setNotaActual(simbolo),
         debeDetener: () => detencionRef.current,
+        duracionMs: ajustesRef.current.duracionNotaMs,
       });
     } catch {
       setErrorLocal('No se pudo reproducir. Revisa el volumen del equipo.');
@@ -361,6 +390,54 @@ export default function InstrumentoPanel(): React.JSX.Element {
           la vez).
         </p>
       )}
+
+      <details className={estilos.tabla}>
+        <summary>Ajustes (velocidad y voz)</summary>
+        <div className={estilos.ajustes}>
+          <label htmlFor="ajuste-duracion">
+            Duración de cada nota al tocar: <strong>{ajustes.duracionNotaMs} ms</strong>
+          </label>
+          <input
+            id="ajuste-duracion"
+            type="range"
+            min={LIMITES.duracionNotaMs.min}
+            max={LIMITES.duracionNotaMs.max}
+            step={LIMITES.duracionNotaMs.paso}
+            value={ajustes.duracionNotaMs}
+            onChange={(e) => setAjustes({ ...ajustes, duracionNotaMs: Number(e.target.value) })}
+          />
+          <label htmlFor="ajuste-velocidad-voz">
+            Velocidad de la voz: <strong>{ajustes.velocidadVoz.toFixed(2)}×</strong>
+          </label>
+          <input
+            id="ajuste-velocidad-voz"
+            type="range"
+            min={LIMITES.velocidadVoz.min}
+            max={LIMITES.velocidadVoz.max}
+            step={LIMITES.velocidadVoz.paso}
+            value={ajustes.velocidadVoz}
+            onChange={(e) => setAjustes({ ...ajustes, velocidadVoz: Number(e.target.value) })}
+          />
+          {voces.length > 0 && (
+            <>
+              <label htmlFor="ajuste-voz">Voz</label>
+              <select
+                id="ajuste-voz"
+                value={ajustes.vozNombre}
+                onChange={(e) => setAjustes({ ...ajustes, vozNombre: e.target.value })}
+              >
+                <option value="">Automática (mejor voz en español)</option>
+                {voces.map((nombre) => (
+                  <option key={nombre} value={nombre}>{nombre}</option>
+                ))}
+              </select>
+            </>
+          )}
+          <button type="button" onClick={() => setAjustes({ ...AJUSTES_POR_DEFECTO })}>
+            Restablecer ajustes
+          </button>
+        </div>
+      </details>
 
       <details className={estilos.tabla}>
         <summary>Frases rápidas (se hablan solas al deletrearlas)</summary>
