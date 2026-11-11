@@ -141,6 +141,7 @@
 
 /* Medidor fuera de la región viva: se lee a demanda, no se anuncia. */
 .snr {
+  grid-column: 1 / -1;
   margin: 0.4rem 0 0;
   font-size: 0.9rem;
   color: var(--muted);
@@ -233,4 +234,80 @@
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* Afinador en vivo. */
+.afinador {
+  grid-column: 1 / -1;
+  margin-top: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--display);
+  color: var(--display-ink);
+}
+
+.afinadorNota {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 2.6rem;
+}
+
+.afinadorLetra {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffd166;
+}
+
+.afinadorNombre {
+  color: var(--display-dim);
+}
+
+.afinadorOk {
+  color: #7be0a8;
+  font-weight: 800;
+}
+
+.afinadorBarra {
+  position: relative;
+  height: 14px;
+  margin: 0.3rem 0.5rem;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.afinadorCentro {
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--display-ink);
+}
+
+.afinadorAguja {
+  position: absolute;
+  top: -2px;
+  width: 6px;
+  height: 18px;
+  margin-left: -3px;
+  border-radius: 3px;
+  background: #ffd166;
+  transition: left 80ms linear;
+}
+
+.afinadorBien {
+  background: #7be0a8;
+}
+
+.afinadorInactiva {
+  background: var(--display-dim);
+  opacity: 0.5;
+}
+
+.afinadorTexto {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--display-dim);
 }

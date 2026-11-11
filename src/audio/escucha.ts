@@ -1,7 +1,11 @@
 import { TAMANO_VENTANA } from '../utils/constants.ts';
 import type { NivelSenal } from '../types/index.ts';
 import { calcularSnrDb, crearCadenaAntiRuido } from './noiseFilter.ts';
-import { DetectorMelodia, type DetectorDeSimbolos } from './melodia.ts';
+import {
+  DetectorMelodia,
+  type DetectorDeSimbolos,
+  type LecturaTono,
+} from './melodia.ts';
 
 /**
  * Motor de escucha: micrófono → filtro pasa-banda → detector en vivo.
@@ -24,6 +28,8 @@ export interface CallbacksEscucha {
   alNivel: (nivel: NivelSenal) => void;
   /** Sonido fuerte sin nota clara (opcional: sugerir una sola cuerda). */
   alConfuso?: () => void;
+  /** En cada ventana: tono actual (o null) para el afinador visual. */
+  alTono?: (lectura: LecturaTono | null) => void;
 }
 
 /** Traduce errores técnicos del micrófono a mensajes para estudiantes. */
@@ -189,6 +195,7 @@ export class MotorEscucha {
       this.obtenerSampleRate(),
       ahora,
     );
+    this.callbacks.alTono?.(this.detector.leerTono?.() ?? null);
     if (resultado !== null) {
       this.callbacks.alConfirmar(resultado.simbolo, resultado.snrDb);
     } else if (

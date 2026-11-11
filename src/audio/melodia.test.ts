@@ -177,4 +177,23 @@ describe('melodia (instrumento → texto)', () => {
     procesarVentanas(detNota, sintetizarMelodia('A', 500, 60));
     expect(detNota.leerConfusion()).toBe(false);
   });
+
+  it('el afinador informa la nota y los cents aunque aún no haya confirmado', () => {
+    const det = new DetectorMelodia();
+    const f = 440 * Math.pow(2, 20 / 1200); // M (LA4) 20 cents agudo
+    det.procesar(sintetizarNota(f, TAMANO_VENTANA), SAMPLE_RATE, 0);
+    const lectura = det.leerTono();
+    expect(lectura?.simbolo).toBe('M');
+    expect(lectura?.cents).toBeGreaterThan(10);
+    expect(lectura?.cents).toBeLessThan(30);
+    expect(lectura?.confirmada).toBe(false);
+    det.procesar(sintetizarNota(f, TAMANO_VENTANA), SAMPLE_RATE, 60);
+    expect(det.leerTono()?.confirmada).toBe(true);
+  });
+
+  it('sin tono claro (silencio) el afinador queda en null', () => {
+    const det = new DetectorMelodia();
+    det.procesar(new Float32Array(TAMANO_VENTANA), SAMPLE_RATE, 0);
+    expect(det.leerTono()).toBeNull();
+  });
 });

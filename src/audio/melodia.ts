@@ -23,6 +23,16 @@ export interface DeteccionSimple {
   snrDb: number;
 }
 
+/** Lo que suena AHORA, para el afinador visual (no depende de confirmar). */
+export interface LecturaTono {
+  /** Letra, signo o espacio más cercano a la frecuencia medida. */
+  simbolo: string;
+  /** Desafinación respecto a esa nota, en cents (negativo = grave). */
+  cents: number;
+  /** ¿Dentro de la tolerancia y sostenida lo bastante para contar? */
+  confirmada: boolean;
+}
+
 /** Contrato que cumple cualquier detector (DTMF o melodía). */
 export interface DetectorDeSimbolos {
   procesar(
@@ -38,6 +48,8 @@ export interface DetectorDeSimbolos {
    * Opcional para no obligar a todos los detectores.
    */
   leerConfusion?(): boolean;
+  /** Tono de la última ventana (afinador visual), o null si no hay tono claro. */
+  leerTono?(): LecturaTono | null;
 }
 
 // RMS a partir del cual hay "sonido de verdad" (no silencio).
@@ -60,6 +72,7 @@ export class DetectorMelodia implements DetectorDeSimbolos {
   private inicioCandidataMs = 0;
   private ultimoEmitido: string | null = null;
   private rachaSinTono = 0;
+  private lectura: LecturaTono | null = null;
 
   reiniciar(): void {
     this.candidata = null;
@@ -80,6 +93,17 @@ export class DetectorMelodia implements DetectorDeSimbolos {
     const estimacion = estimarFrecuenciaFundamental(muestras, sampleRate);
     const nota =
       estimacion === null ? null : notaMasCercana(estimacion.frecuencia);
+    // Para el afinador: la nota más cercana aunque esté algo desafinada.
+    const cercana =
+      estimacion === null ? null : notaMasCercana(estimacion.frecuencia, 50);
+    this.lectura =
+      cercana === null
+        ? null
+        : {
+            simbolo: cercana.simbolo,
+            cents: cercana.cents,
+            confirmada: false,
+          };
     if (estimacion === null || nota === null) {
       if (rms >= UMBRAL_SONIDO_FUERTE) this.rachaSinTono += 1;
       else this.rachaSinTono = 0;
@@ -101,11 +125,16 @@ export class DetectorMelodia implements DetectorDeSimbolos {
       this.ventanasSeguidas >= VENTANAS_CONSECUTIVAS &&
       tiempoSostenido >= DURACION_MINIMA_MS;
     if (!confirmada) return null;
+    if (this.lectura !== null) this.lectura.confirmada = true;
     if (this.ultimoEmitido === nota.simbolo) return null;
 
     this.ultimoEmitido = nota.simbolo;
     // La claridad (0–1) como SNR aproximada para el medidor.
     return { simbolo: nota.simbolo, snrDb: 5 + estimacion.claridad * 25 };
+  }
+
+  leerTono(): LecturaTono | null {
+    return this.lectura;
   }
 
   leerConfusion(): boolean {

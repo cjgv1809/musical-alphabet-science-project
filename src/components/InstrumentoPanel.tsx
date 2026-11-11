@@ -6,10 +6,11 @@ import {
   solicitarDetencionMelodia,
   tocarMelodia,
 } from '../audio/instrumento.ts';
-import { DetectorMelodia } from '../audio/melodia.ts';
+import { DetectorMelodia, type LecturaTono } from '../audio/melodia.ts';
 import { callar, hablar, hayVoz } from '../audio/voz.ts';
 import { motorEscucha } from '../audio/escucha.ts';
 import type { NivelSenal } from '../types/index.ts';
+import Afinador from './Afinador.tsx';
 import MedidorSnr from './MedidorSnr.tsx';
 import TablaNotas from './TablaNotas.tsx';
 import estilos from './InstrumentoPanel.module.css';
@@ -38,6 +39,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const [confuso, setConfuso] = useState(false);
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
   /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
+  const receptorTonoRef = useRef<((lectura: LecturaTono | null) => void) | null>(null);
   const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
   const detencionRef = useRef(false);
   /** El micro no transcribe mientras la app habla o toca (anti-eco). */
@@ -156,6 +158,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
             if (pausaTranscripcionRef.current) return;
             setConfuso(true);
           },
+          alTono: (lectura) => receptorTonoRef.current?.(lectura),
           alNivel: (nuevoNivel) => receptorNivelRef.current?.(nuevoNivel),
         },
         new DetectorMelodia(),
@@ -340,6 +343,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
             texto
           )}
         </div>
+        {escuchando && <Afinador receptor={receptorTonoRef} />}
         {escuchando && <MedidorSnr receptor={receptorNivelRef} />}
       </div>
 
