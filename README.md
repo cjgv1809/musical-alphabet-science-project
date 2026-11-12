@@ -4,6 +4,9 @@
 y la app la convierte en texto y voz. Proyecto de Física (Acústica) con
 enfoque **accesible**: comunicación sin barreras a través de instrumentos.
 
+**▶ Pruébala en línea: <https://cjgv1809.github.io/musical-alphabet-science-project/>**
+(se puede instalar como app desde el navegador y funciona sin conexión).
+
 Tocas `HOLA` (MI4–SI4–SOL5–LA3) y la app escribe HOLA; si completas una
 frase esencial (AGUA, AYUDA, ME DUELE…), la muestra en grande y **la dice
 en voz alta**.
