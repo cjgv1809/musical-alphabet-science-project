@@ -1,30 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
-import {
-  FRASES_ESENCIALES,
-  buscarFrase,
-  normalizarFrase,
-  sugerirFrases,
-} from '../audio/frases.ts';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { FRASES_ESENCIALES, buscarFrase, sugerirFrases } from '../audio/frases.ts';
+import { solicitarDetencionMelodia, tocarMelodia } from '../audio/instrumento.ts';
+import { callar, hayVoz } from '../audio/voz.ts';
 import { useAjustes } from '../hooks/useAjustes.ts';
 import { useAviso } from '../hooks/useAviso.ts';
+import { useEscucha } from '../hooks/useEscucha.ts';
 import { useFrasesPersonalizadas } from '../hooks/useFrasesPersonalizadas.ts';
 import { useHistorial } from '../hooks/useHistorial.ts';
 import { useVoz } from '../hooks/useVoz.ts';
 import { useVocesEspanolas } from '../hooks/useVocesEspanolas.ts';
-import {
-  asegurarAudioListo,
-  solicitarDetencionMelodia,
-  tocarMelodia,
-} from '../audio/instrumento.ts';
-import { DetectorMelodia, type LecturaTono } from '../audio/melodia.ts';
-import { callar, hayVoz } from '../audio/voz.ts';
-import { motorEscucha } from '../audio/escucha.ts';
-import { AJUSTES_POR_DEFECTO, LIMITES } from '../utils/ajustes.ts';
-import type { NivelSenal } from '../types/index.ts';
-import Afinador from './Afinador.tsx';
-import MedidorSnr from './MedidorSnr.tsx';
-import TablaNotas from './TablaNotas.tsx';
+import ListaPestanas, { type Pestana } from './ListaPestanas.tsx';
+import PestanaAprender from './PestanaAprender.tsx';
+import PestanaHablar from './PestanaHablar.tsx';
 import estilos from './InstrumentoPanel.module.css';
 
 /** Silencio (ms) tras la última nota antes de decir la frase en voz alta. */
@@ -32,35 +19,26 @@ const RETRASO_FRASE_MS = 1200;
 /** Máximo de letras que se conservan de la transcripción. */
 const MAX_TEXTO = 200;
 
+const PESTANAS: readonly Pestana[] = [
+  { id: 'hablar', etiqueta: 'Hablar', icono: '🎤' },
+  { id: 'aprender', etiqueta: 'Aprender', icono: '🎸' },
+];
+
 /**
  * Panel principal: de la guitarra a las palabras (modo accesible).
- * - "Tocar melodía": el emisor sintetizado toca el texto.
- * - "Escuchar melodía": transcribe guitarra/flauta/voz (una nota afinada).
- * - Fraseario: si lo transcrito equivale a una frase esencial, se muestra
- *   en grande y se HABLA en voz alta. Botón Hablar para texto libre.
+ * Coordina el estado compartido y reparte la interfaz en dos pestañas:
+ * - "Hablar": escucha la guitarra, transcribe y dice las frases en voz alta.
+ * - "Aprender": toca melodías, muestra notas, frases y ajustes.
+ * Las dos pestañas siguen montadas (solo se ocultan) para que cambiar de una
+ * a otra no corte la escucha ni pierda la transcripción.
  */
 export default function InstrumentoPanel(): React.JSX.Element {
+  const [pestana, setPestana] = useState('hablar');
   const [mensaje, setMensaje] = useState('HOLA');
   const [tocando, setTocando] = useState(false);
-  const [escuchando, setEscuchando] = useState(false);
   const [notaActual, setNotaActual] = useState<string | null>(null);
   const [texto, setTexto] = useState('');
-  const [confuso, setConfuso] = useState(false);
   const [errorLocal, setErrorLocal] = useState<string | null>(null);
-  /** Lo registra <MedidorSnr>: el nivel (25 Hz) no pasa por el estado del panel. */
-  const receptorTonoRef = useRef<((lectura: LecturaTono | null) => void) | null>(null);
-  const receptorNivelRef = useRef<((nivel: NivelSenal) => void) | null>(null);
-  // Registro de los receptores (referencias estables para los efectos hijos).
-  const registrarTono = useCallback(
-    (receptor: ((lectura: LecturaTono | null) => void) | null) => {
-      receptorTonoRef.current = receptor;
-    },
-    [],
-  );
-  const registrarNivel = useCallback((receptor: ((nivel: NivelSenal) => void) | null) => {
-    receptorNivelRef.current = receptor;
-  }, []);
-  const [nuevaFrase, setNuevaFrase] = useState('');
   const { ajustes, setAjustes, ajustesRef } = useAjustes();
   const voces = useVocesEspanolas();
   const { historial, registrar, borrar: borrarHistorial } = useHistorial();
@@ -69,6 +47,20 @@ export default function InstrumentoPanel(): React.JSX.Element {
   const { hablarConPausa, pausaTranscripcionRef } = useVoz(ajustesRef, registrar);
   const detencionRef = useRef(false);
   const ultimoHabladoRef = useRef('');
+
+  const escucha = useEscucha(
+    pausaTranscripcionRef,
+    (simbolo) => {
+      // Si lo anterior ya se dijo en voz alta como frase, empieza una frase
+      // nueva (así se puede decir AGUA, y luego AYUDA).
+      setTexto((t) =>
+        t !== '' && t === ultimoHabladoRef.current
+          ? simbolo
+          : (t + simbolo).slice(-MAX_TEXTO),
+      );
+    },
+    setErrorLocal,
+  );
 
   /** Frase esencial o propia que equivale a lo transcrito (derivada, sin estado). */
   const fraseDetectada = useMemo(
@@ -127,72 +119,10 @@ export default function InstrumentoPanel(): React.JSX.Element {
     }
   };
 
-  const empezarEscucha = useCallback(async (): Promise<void> => {
-    if (motorEscucha.estaActivo()) return;
-    setErrorLocal(null);
-    try {
-      await motorEscucha.iniciar(
-        {
-          alConfirmar: (simbolo) => {
-            // Ignora lo que suena mientras la app habla o toca.
-            if (pausaTranscripcionRef.current) return;
-            setConfuso(false);
-            // Vibración breve: confirma la letra sin mirar ni oír (si hay soporte).
-            navigator.vibrate?.(25);
-            // Si lo anterior ya se dijo en voz alta como frase, empieza
-            // una frase nueva (así se puede decir AGUA, y luego AYUDA).
-            setTexto((t) =>
-              t !== '' && t === ultimoHabladoRef.current
-                ? simbolo
-                : (t + simbolo).slice(-MAX_TEXTO),
-            );
-          },
-          // Sonido fuerte sin nota clara (acorde rasgueado): sugiere una cuerda.
-          alConfuso: () => {
-            if (pausaTranscripcionRef.current) return;
-            setConfuso(true);
-          },
-          alTono: (lectura) => receptorTonoRef.current?.(lectura),
-          alNivel: (nuevoNivel) => receptorNivelRef.current?.(nuevoNivel),
-        },
-        new DetectorMelodia(),
-      );
-      setEscuchando(true);
-    } catch (err) {
-      setErrorLocal(
-        err instanceof Error ? err.message : 'No se pudo activar el micrófono.',
-      );
-    }
-  }, [pausaTranscripcionRef]);
-
-  const detenerEscucha = (): void => {
-    motorEscucha.detener();
-    setEscuchando(false);
-    setConfuso(false);
+  const detenerMelodia = (): void => {
+    detencionRef.current = true;
+    solicitarDetencionMelodia();
   };
-
-  // Los móviles suspenden el audio al ocultar la app: al volver a ella,
-  // se reanudan los contextos y, si el motor no revive, la escucha se
-  // reinicia sola (sin pulsar nada).
-  useEffect(() => {
-    const alVolver = (): void => {
-      if (document.hidden) return;
-      // Emisor: despierta el contexto de audio.
-      void asegurarAudioListo().catch(() => undefined);
-      // Receptor: solo si estaba escuchando.
-      if (!motorEscucha.estaActivo()) return;
-      void (async () => {
-        const vive = await motorEscucha.reanudar();
-        if (!vive) {
-          motorEscucha.detener();
-          setEscuchando(false);
-          await empezarEscucha();
-        }
-      })().catch(() => undefined);
-    };
-    document.addEventListener('visibilitychange', alVolver);
-    return () => document.removeEventListener('visibilitychange', alVolver);
-  }, [empezarEscucha]);
 
   const textoCompartible = (): string => fraseDetectada ?? texto;
 
@@ -215,14 +145,33 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
   const borrarUltima = (): void => {
     setTexto((t) => t.slice(0, -1));
-    setConfuso(false);
+    escucha.limpiarConfuso();
     callar();
   };
 
-  const anadirFrase = (): void => {
-    const error = anadir(nuevaFrase);
+  const limpiarTexto = (): void => {
+    setTexto('');
+    escucha.limpiarConfuso();
+    ultimoHabladoRef.current = '';
+    callar();
+  };
+
+  const decirFrase = (frase: string): void => {
+    if (!hablarConPausa(frase)) {
+      setErrorLocal('Este navegador no tiene voz sintetizada.');
+    }
+  };
+
+  const hablarTexto = (): void => {
+    if (!hablarConPausa(fraseDetectada ?? texto)) {
+      setErrorLocal('Este navegador no tiene voz sintetizada: lee el texto en pantalla.');
+    }
+  };
+
+  const anadirFrase = (entrada: string): boolean => {
+    const error = anadir(entrada);
     setErrorLocal(error);
-    if (error === null) setNuevaFrase('');
+    return error === null;
   };
 
   const sugerencias =
@@ -233,129 +182,23 @@ export default function InstrumentoPanel(): React.JSX.Element {
         ])
       : [];
 
-  const decirFrase = (frase: string): void => {
-    if (!hablarConPausa(frase)) {
-      setErrorLocal('Este navegador no tiene voz sintetizada.');
-    }
-  };
-
-  const limpiarTexto = (): void => {
-    setTexto('');
-    setConfuso(false);
-    ultimoHabladoRef.current = '';
-    callar();
-  };
-
-  const hablarTexto = (): void => {
-    if (!hablarConPausa(fraseDetectada ?? texto)) {
-      setErrorLocal('Este navegador no tiene voz sintetizada: lee el texto en pantalla.');
-    }
-  };
-
-  /** Secuencia de notas de una frase (para aprenderla en la guitarra). */
-  const notasDe = (frase: string): string =>
-    [...normalizarFrase(frase)].map((c) => obtenerNombreNota(c) ?? '?').join(' · ');
-
   return (
     <section className={estilos.panel} aria-labelledby="titulo-instrumento">
       <h2 id="titulo-instrumento">
         De la guitarra a las palabras <span aria-hidden="true">🎸</span>
       </h2>
-      <p className={estilos.ayuda}>
-        Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…): toca la
-        melodía aquí o con una guitarra/flauta/voz afinada, de una nota cada vez. Si
-        completas una frase esencial, la app la dice en voz alta. Espacio = cuerda RE al
-        aire (146.83 Hz).
-      </p>
 
-      <label className={estilos.etiqueta} htmlFor="campo-melodia">
-        Mensaje (A–Z y signos . , ? ! ¿ ¡)
-      </label>
-      <input
-        id="campo-melodia"
-        className={estilos.texto}
-        type="text"
-        maxLength={60}
-        value={mensaje}
-        disabled={tocando}
-        onChange={(e) => setMensaje(e.target.value)}
-        placeholder="Ej. HOLA"
+      <ListaPestanas
+        pestanas={PESTANAS}
+        activa={pestana}
+        onCambiar={setPestana}
+        prefijo="instrumento"
+        etiquetaLista="Secciones"
       />
-
-      <div className={estilos.botones}>
-        {!tocando ? (
-          <button
-            type="button"
-            className={estilos.tocar}
-            onClick={() => void tocar()}
-            disabled={mensaje.trim().length === 0}
-          >
-            <span aria-hidden="true">▶</span> Tocar melodía
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              detencionRef.current = true;
-              solicitarDetencionMelodia();
-            }}
-          >
-            <span aria-hidden="true">■</span> Detener
-          </button>
-        )}
-        {!escuchando ? (
-          <button type="button" onClick={() => void empezarEscucha()}>
-            <span aria-hidden="true">●</span> Escuchar melodía
-          </button>
-        ) : (
-          <button type="button" onClick={detenerEscucha}>
-            <span aria-hidden="true">■</span> Dejar de escuchar
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={hablarTexto}
-          disabled={texto.length === 0}
-          aria-label="Leer en voz alta el texto transcrito"
-        >
-          <span aria-hidden="true">🔊</span> Hablar
-        </button>
-        <button
-          type="button"
-          onClick={() => void copiarTexto()}
-          disabled={texto.length === 0}
-        >
-          <span aria-hidden="true">📋</span> Copiar
-        </button>
-        {typeof navigator.share === 'function' && (
-          <button
-            type="button"
-            onClick={() => void compartirTexto()}
-            disabled={texto.length === 0}
-          >
-            <span aria-hidden="true">↗</span> Compartir
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={borrarUltima}
-          disabled={texto.length === 0}
-          aria-label="Borrar la última letra"
-        >
-          <span aria-hidden="true">⌫</span> Borrar
-        </button>
-        <button type="button" onClick={limpiarTexto} disabled={texto.length === 0}>
-          Limpiar
-        </button>
-      </div>
 
       {/* Anuncia el estado del micrófono a lectores de pantalla. */}
       <p className={estilos.soloLector} role="status">
-        {escuchando ? 'Micrófono activado: escuchando.' : ''}
-      </p>
-
-      <p className={estilos.exito} role="status">
-        {aviso ?? ''}
+        {escucha.escuchando ? 'Micrófono activado: escuchando.' : ''}
       </p>
 
       {errorLocal !== null && (
@@ -364,219 +207,56 @@ export default function InstrumentoPanel(): React.JSX.Element {
         </p>
       )}
 
-      <div className={estilos.doble}>
-        <div className={estilos.ahoraSuena}>
-          {notaActual === null ? (
-            <span className={estilos.apagado}>—</span>
-          ) : (
-            <span className={estilos.nota}>
-              {notaActual === ' ' ? '␣ ESPACIO' : notaActual}
-              <small>
-                {' '}
-                {`(${obtenerNombreNota(notaActual) ?? ''} · ${obtenerFrecuenciaNota(notaActual) ?? ''} Hz)`}
-              </small>
-            </span>
-          )}
-        </div>
-        <div
-          className={estilos.resultado}
-          role="log"
-          aria-live="polite"
-          aria-label="Melodía transcrita"
-        >
-          {texto.length === 0 ? (
-            <span className={estilos.vacio}>
-              {escuchando
-                ? 'Escuchando… toca notas cerca del micrófono.'
-                : 'Aquí aparecerá la melodía transcrita.'}
-            </span>
-          ) : (
-            texto
-          )}
-        </div>
-        {escuchando && <Afinador registrar={registrarTono} />}
-        {escuchando && <MedidorSnr registrar={registrarNivel} />}
+      <div
+        role="tabpanel"
+        id="instrumento-panel-hablar"
+        aria-labelledby="instrumento-tab-hablar"
+        hidden={pestana !== 'hablar'}
+      >
+        <PestanaHablar
+          escuchando={escucha.escuchando}
+          onEmpezar={() => void escucha.empezar()}
+          onDetener={escucha.detener}
+          texto={texto}
+          fraseDetectada={fraseDetectada}
+          sugerencias={sugerencias}
+          confuso={escucha.confuso}
+          aviso={aviso}
+          registrarTono={escucha.registrarTono}
+          registrarNivel={escucha.registrarNivel}
+          onHablar={hablarTexto}
+          onCopiar={() => void copiarTexto()}
+          onCompartir={() => void compartirTexto()}
+          onBorrarUltima={borrarUltima}
+          onLimpiar={limpiarTexto}
+          historial={historial}
+          onDecir={decirFrase}
+          onBorrarHistorial={borrarHistorial}
+        />
       </div>
 
-      {sugerencias.length > 0 && (
-        <p className={estilos.sugerencias}>
-          <span>¿Quieres decir?</span>
-          {sugerencias.map((frase) => (
-            <button
-              key={frase}
-              type="button"
-              className={estilos.sugerencia}
-              onClick={() => decirFrase(frase)}
-              aria-label={`Decir en voz alta: ${frase}`}
-            >
-              {frase}
-            </button>
-          ))}
-        </p>
-      )}
-
-      {fraseDetectada !== null && (
-        <p className={estilos.fraseReconocida} role="status">
-          <span aria-hidden="true">✅</span> Frase reconocida:{' '}
-          <strong>{fraseDetectada}</strong>
-        </p>
-      )}
-
-      {confuso && fraseDetectada === null && (
-        <p className={estilos.aviso} role="status">
-          <span aria-hidden="true">🎸</span> Se oye sonido pero ninguna nota clara: toca
-          de a <strong>una sola cuerda</strong> por vez, despacio y cerca del micro. Los
-          acordes rasgueados no se leen (suenan varias notas a la vez).
-        </p>
-      )}
-
-      <details className={estilos.tabla}>
-        <summary>Historial (lo último que se dijo)</summary>
-        {historial.length === 0 ? (
-          <p className={estilos.ayuda}>Todavía no se ha dicho nada.</p>
-        ) : (
-          <>
-            <ul className={estilos.propias}>
-              {historial.map((frase) => (
-                <li key={frase}>
-                  <span>{frase}</span>
-                  <button
-                    type="button"
-                    onClick={() => decirFrase(frase)}
-                    aria-label={`Decir otra vez: ${frase}`}
-                  >
-                    Decir
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className={estilos.nuevaFrase}>
-              <button type="button" onClick={borrarHistorial}>
-                Borrar historial
-              </button>
-            </div>
-          </>
-        )}
-      </details>
-
-      <details className={estilos.tabla}>
-        <summary>Ajustes (velocidad y voz)</summary>
-        <div className={estilos.ajustes}>
-          <label htmlFor="ajuste-duracion">
-            Duración de cada nota al tocar: <strong>{ajustes.duracionNotaMs} ms</strong>
-          </label>
-          <input
-            id="ajuste-duracion"
-            type="range"
-            min={LIMITES.duracionNotaMs.min}
-            max={LIMITES.duracionNotaMs.max}
-            step={LIMITES.duracionNotaMs.paso}
-            value={ajustes.duracionNotaMs}
-            onChange={(e) =>
-              setAjustes({ ...ajustes, duracionNotaMs: Number(e.target.value) })
-            }
-          />
-          <label htmlFor="ajuste-velocidad-voz">
-            Velocidad de la voz: <strong>{ajustes.velocidadVoz.toFixed(2)}×</strong>
-          </label>
-          <input
-            id="ajuste-velocidad-voz"
-            type="range"
-            min={LIMITES.velocidadVoz.min}
-            max={LIMITES.velocidadVoz.max}
-            step={LIMITES.velocidadVoz.paso}
-            value={ajustes.velocidadVoz}
-            onChange={(e) =>
-              setAjustes({ ...ajustes, velocidadVoz: Number(e.target.value) })
-            }
-          />
-          {voces.length > 0 && (
-            <>
-              <label htmlFor="ajuste-voz">Voz</label>
-              <select
-                id="ajuste-voz"
-                value={ajustes.vozNombre}
-                onChange={(e) => setAjustes({ ...ajustes, vozNombre: e.target.value })}
-              >
-                <option value="">Automática (mejor voz en español)</option>
-                {voces.map((nombre) => (
-                  <option key={nombre} value={nombre}>
-                    {nombre}
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
-          <button type="button" onClick={() => setAjustes({ ...AJUSTES_POR_DEFECTO })}>
-            Restablecer ajustes
-          </button>
-        </div>
-      </details>
-
-      <details className={estilos.tabla}>
-        <summary>Frases rápidas (se hablan solas al deletrearlas)</summary>
-        <div className={estilos.frasesGrid}>
-          {[...FRASES_ESENCIALES.map((f) => f.texto), ...personalizadas].map((frase) => (
-            <button
-              key={frase}
-              type="button"
-              className={estilos.fraseBtn}
-              onClick={() => decirFrase(frase)}
-              aria-label={`Decir en voz alta: ${frase}. Notas: ${notasDe(frase)}`}
-            >
-              <span>{frase}</span>
-              <small>{notasDe(frase)}</small>
-            </button>
-          ))}
-        </div>
-
-        <div className={estilos.nuevaFrase}>
-          <label htmlFor="nueva-frase">
-            Añadir tu propia frase (nombre, medicación…)
-          </label>
-          <div className={estilos.nuevaFraseFila}>
-            <input
-              id="nueva-frase"
-              type="text"
-              maxLength={40}
-              value={nuevaFrase}
-              onChange={(e) => setNuevaFrase(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') anadirFrase();
-              }}
-              placeholder="Ej. Me llamo Ana"
-            />
-            <button
-              type="button"
-              onClick={anadirFrase}
-              disabled={nuevaFrase.trim() === ''}
-            >
-              Añadir
-            </button>
-          </div>
-          {personalizadas.length > 0 && (
-            <ul className={estilos.propias}>
-              {personalizadas.map((frase) => (
-                <li key={frase}>
-                  <span>{frase}</span>
-                  <button
-                    type="button"
-                    onClick={() => quitarFrase(frase)}
-                    aria-label={`Quitar la frase ${frase}`}
-                  >
-                    Quitar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </details>
-
-      <details className={estilos.tabla}>
-        <summary>Ver notas, signos y espacio (para afinar la guitarra)</summary>
-        <TablaNotas />
-      </details>
+      <div
+        role="tabpanel"
+        id="instrumento-panel-aprender"
+        aria-labelledby="instrumento-tab-aprender"
+        hidden={pestana !== 'aprender'}
+      >
+        <PestanaAprender
+          mensaje={mensaje}
+          onMensaje={setMensaje}
+          tocando={tocando}
+          onTocar={() => void tocar()}
+          onDetenerMelodia={detenerMelodia}
+          notaActual={notaActual}
+          ajustes={ajustes}
+          setAjustes={setAjustes}
+          voces={voces}
+          personalizadas={personalizadas}
+          onAnadir={anadirFrase}
+          onQuitar={quitarFrase}
+          onDecir={decirFrase}
+        />
+      </div>
     </section>
   );
 }

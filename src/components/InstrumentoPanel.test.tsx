@@ -44,6 +44,20 @@ describe('InstrumentoPanel (escucha simulada)', () => {
     expect(screen.getByText(/una sola cuerda/i)).toBeInTheDocument();
   });
 
+  it('cambiar de pestaña no corta la escucha ni pierde la transcripción', async () => {
+    await empezar();
+    tocar('HOL');
+    act(() => screen.getByRole('tab', { name: /aprender/i }).click());
+    act(() => screen.getByRole('tab', { name: /hablar/i }).click());
+    expect(motorEscucha.detener).not.toHaveBeenCalled();
+    expect(screen.getByRole('log', { name: /melodía transcrita/i })).toHaveTextContent(
+      /^HOL$/,
+    );
+    expect(
+      screen.getByRole('button', { name: /dejar de escuchar/i }),
+    ).toBeInTheDocument();
+  });
+
   it('Borrar quita solo la última letra', async () => {
     await empezar();
     tocar('HOLA');

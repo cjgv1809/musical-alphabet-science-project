@@ -423,3 +423,42 @@
   color: var(--accent-listen);
   font-weight: 700;
 }
+
+/* Pestañas Hablar / Aprender. */
+.pestanas {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0.9rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.pestana {
+  flex: 1;
+  min-height: 48px;
+  padding: 0.5rem 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: transparent;
+  border: 2px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: pointer;
+  margin-bottom: -2px;
+}
+
+.pestana[aria-selected='true'] {
+  background: var(--card);
+  border-color: var(--border);
+  border-bottom: 2px solid var(--card);
+  color: var(--accent);
+}
+
+/* La transcripción ocupa todo el ancho; la nota que suena va en "Aprender". */
+.resultado {
+  grid-column: 1 / -1;
+}
+
+.ahoraSuenaFila {
+  margin-top: 0.8rem;
+}
