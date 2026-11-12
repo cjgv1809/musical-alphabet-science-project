@@ -26,7 +26,8 @@ en voz alta**.
 npm install
 npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
-npm run test     # tests unitarios (Vitest, 28 tests)
+npm run test     # tests unitarios (Vitest, 50 tests)
+npm run test:e2e # E2E (Playwright + micrófono falso; 1.ª vez: npx playwright install chromium)
 npm run typecheck # TypeScript estricto
 npm run lint      # ESLint (React hooks + accesibilidad JSX)
 npm run format    # Prettier (formatea todo); format:check solo comprueba

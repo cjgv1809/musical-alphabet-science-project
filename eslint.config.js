@@ -13,7 +13,13 @@ import tseslint from 'typescript-eslint';
 // - eslint-config-prettier va al final: apaga reglas de formato que
 //   chocarían con Prettier (el formato lo decide Prettier, no ESLint).
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'coverage']),
+  globalIgnores([
+    'dist',
+    'node_modules',
+    'coverage',
+    'test-results',
+    'playwright-report',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -34,7 +40,7 @@ export default defineConfig([
     languageOptions: { globals: globals.serviceworker },
   },
   {
-    files: ['*.config.{js,ts}', 'vitest.setup.ts'],
+    files: ['*.config.{js,ts}', 'vitest.setup.ts', 'e2e/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
   prettier,
