@@ -51,13 +51,7 @@ export interface OpcionesTocarMelodia {
   debeDetener?: () => boolean;
 }
 
-let sonandoMelodia = false;
 let detenerMelodia = false;
-
-/** ¿Hay una melodía sonando ahora? */
-export function estaSonandoMelodia(): boolean {
-  return sonandoMelodia;
-}
 
 /** Señal de parada (botón Detener del panel instrumento). */
 export function solicitarDetencionMelodia(): void {
@@ -116,28 +110,23 @@ export async function tocarMelodia(
   } = opciones;
 
   await asegurarAudioListo();
-  sonandoMelodia = true;
   detenerMelodia = false;
   const detenido = (): boolean => detenerMelodia || debeDetener?.() === true;
-  try {
-    let indiceVisible = 0;
-    for (const caracter of mensaje) {
-      if (detenido()) break;
-      const simbolo = normalizarSimboloCromatico(caracter);
-      if (simbolo === null) {
-        await esperarMs(pausaMs);
-        indiceVisible += 1;
-        continue;
-      }
-      alIniciarNota?.(simbolo, indiceVisible);
-      // El espacio también suena (RE3, cuerda al aire): así las palabras
-      // no se pegan. El silencio entre notas lo pone la pausa posterior.
-      await tocarNota(simbolo, duracionMs);
-      if (detenido()) break;
+  let indiceVisible = 0;
+  for (const caracter of mensaje) {
+    if (detenido()) break;
+    const simbolo = normalizarSimboloCromatico(caracter);
+    if (simbolo === null) {
       await esperarMs(pausaMs);
       indiceVisible += 1;
+      continue;
     }
-  } finally {
-    sonandoMelodia = false;
+    alIniciarNota?.(simbolo, indiceVisible);
+    // El espacio también suena (RE3, cuerda al aire): así las palabras
+    // no se pegan. El silencio entre notas lo pone la pausa posterior.
+    await tocarNota(simbolo, duracionMs);
+    if (detenido()) break;
+    await esperarMs(pausaMs);
+    indiceVisible += 1;
   }
 }

@@ -2,24 +2,23 @@
  * Constantes globales del proyecto.
  *
  * Física involucrada:
- * - Trabajamos en 300–3000 Hz (banda de voz/telefonía): propaga bien por aire
- *   en un aula ruidosa y evita el ruido grave (<300 Hz: ventiladores, pasos).
+ * - El micrófono se filtra entre 100 y 3000 Hz: deja pasar todas las notas
+ *   (146.83–932 Hz) y evita el ruido grave (<100 Hz: ventiladores, pasos).
  * - La duración mínima de 50 ms por símbolo evita que ruidos impulsivos
  *   (palmadas, golpes) se confundan con una letra.
  */
 
-// Banda de trabajo (Hz). Todo símbolo usa frecuencias dentro de este rango.
-export const FRECUENCIA_MINIMA = 300;
-export const FRECUENCIA_MAXIMA = 3000;
-
-// Corte del pasa-altas del micrófono (Hz). Más bajo que FRECUENCIA_MINIMA a
-// propósito: las notas más graves (espacio RE3 = 146.83 Hz, signos 155–208 Hz
-// y A–F = 220–293 Hz) caen por debajo de 300 Hz. Un corte a 300 Hz las
-// atenuaría (hasta -13 dB) y con timbres ricos en armónicos YIN podría
-// confundirlas con su octava. A 100 Hz se sigue recortando el ruido grave.
+// Corte del pasa-altas del micrófono (Hz). Las notas más graves (espacio
+// RE3 = 146.83 Hz, signos 155–208 Hz y A–F = 220–293 Hz) caen por debajo
+// de 300 Hz: un corte a 300 Hz las atenuaría (hasta -13 dB) y con timbres
+// ricos en armónicos YIN podría confundirlas con su octava. A 100 Hz se
+// sigue recortando el ruido grave.
 export const FRECUENCIA_CORTE_GRAVES = 100;
 
-// Ventana de análisis para Goertzel (n.º de muestras por bloque).
+// Corte del pasa-bajas del micrófono (Hz): recorta chillidos y ultrasonidos.
+export const FRECUENCIA_MAXIMA = 3000;
+
+// Ventana de análisis para YIN (n.º de muestras por bloque).
 // 1024 muestras a 44100 Hz ≈ 23 ms por ventana.
 export const TAMANO_VENTANA = 1024;
 
@@ -29,10 +28,6 @@ export const DURACION_MINIMA_MS = 50;
 
 // N.º de ventanas consecutivas con la misma detección para aceptar el símbolo.
 export const VENTANAS_CONSECUTIVAS = 2;
-
-// Factor del umbral dinámico: umbral = ruidoPromedio * FACTOR.
-// El ruido se mide en frecuencias "vacías" (no usadas por el mapeo).
-export const FACTOR_UMBRAL = 3;
 
 // Duración de cada símbolo al "tocar" (ms): fija, sin control de velocidad.
 // 500 ms dan margen de sobra al decodificador (confirma en ~80 ms).

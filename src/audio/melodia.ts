@@ -6,8 +6,8 @@ import { estimarFrecuenciaFundamental } from './tonoFundamental.ts';
  * Detector de melodías (modo instrumento).
  *
  * Cadena por ventana: estima la fundamental (YIN) → la redondea a la
- * letra más cercana (±45 cents) → exige confirmación temporal, igual
- * que el modo DTMF: 2 ventanas seguidas + 50 ms mínimos, y una sola
+ * letra más cercana (±45 cents) → exige confirmación temporal:
+ * 2 ventanas seguidas + 50 ms mínimos, y una sola
  * emisión por nota sostenida (la repetición exige un silencio intermedio).
  *
  * Limitación conocida del prototipo: ventanas fijas cada 40 ms, así que
@@ -33,7 +33,7 @@ export interface LecturaTono {
   confirmada: boolean;
 }
 
-/** Contrato que cumple cualquier detector (DTMF o melodía). */
+/** Contrato que cumple cualquier detector de símbolos. */
 export interface DetectorDeSimbolos {
   procesar(
     muestras: Float32Array,

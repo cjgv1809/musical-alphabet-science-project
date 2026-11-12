@@ -4,7 +4,6 @@ import {
   DURACION_SIMBOLO_MS,
   FRECUENCIA_CORTE_GRAVES,
   FRECUENCIA_MAXIMA,
-  FRECUENCIA_MINIMA,
   PAUSA_ENTRE_SIMBOLOS_MS,
   TAMANO_VENTANA,
   VENTANAS_CONSECUTIVAS,
@@ -13,13 +12,13 @@ import {
 /**
  * Test de constantes: verifica que los parámetros del proyecto
  * cumplen los requisitos físicos.
- * - Banda 300–3000 Hz (voz): nuestras notas (220–932 Hz) viajan bien.
+ * - Banda del micrófono 100–3000 Hz: cubre todas las notas (146.83–932 Hz).
  * - Duración mínima ≥ 50 ms (anti impulsivos).
  * - El tono emitido dura mucho más de lo que tarda el detector.
  */
 describe('constants', () => {
-  it('usa la banda de voz 300–3000 Hz', () => {
-    expect(FRECUENCIA_MINIMA).toBe(300);
+  it('filtra el micrófono entre 100 y 3000 Hz', () => {
+    expect(FRECUENCIA_CORTE_GRAVES).toBe(100);
     expect(FRECUENCIA_MAXIMA).toBe(3000);
   });
 
