@@ -59,6 +59,18 @@ describe('voz (elección de voz española)', () => {
     expect(textoParaVoz('A')).toBe('A');
   });
 
+  it('reconoce TE QUIERO aunque la guitarra no emita el espacio', () => {
+    expect(buscarFrase('TEQUIERO')).toBe('TE QUIERO');
+    expect(buscarFrase('TE QUIERO')).toBe('TE QUIERO');
+    // Se sugiere mientras se deletrea.
+    expect(
+      sugerirFrases(
+        'TEQ',
+        FRASES_ESENCIALES.map((f) => f.texto),
+      ),
+    ).toEqual(['TE QUIERO']);
+  });
+
   it('reconoce también las frases personalizadas', () => {
     expect(buscarFrase('MARIA', ['María'])).toBe('María');
     expect(buscarFrase('MARIA')).toBeNull();

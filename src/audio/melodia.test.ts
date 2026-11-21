@@ -229,7 +229,7 @@ describe('melodia (instrumento → texto)', () => {
   });
 
   describe('solo guitarra (rechaza la voz)', () => {
-    it('todas las frases esenciales se reconocen tocando rápido (150 ms por nota)', () => {
+    it('todas las frases esenciales (incluida TE QUIERO) se reconocen tocando rápido (150 ms por nota)', () => {
       for (const frase of FRASES_ESENCIALES) {
         const clave = normalizarFrase(frase.texto);
         expect(transcribir(sintetizarMelodia(clave, 150, 40, GUITARRA))).toBe(clave);

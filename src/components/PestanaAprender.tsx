@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
-import { AJUSTES_POR_DEFECTO, LIMITES, type Ajustes } from '../utils/ajustes.ts';
+import { LIMITES, type Ajustes } from '../utils/ajustes.ts';
 import TablaNotas from './TablaNotas.tsx';
 import estilos from './InstrumentoPanel.module.css';
 
@@ -14,25 +13,14 @@ interface Props {
   notaActual: string | null;
   ajustes: Ajustes;
   setAjustes: Dispatch<SetStateAction<Ajustes>>;
-  voces: string[];
-  personalizadas: string[];
-  /** Intenta añadir una frase propia; true si se añadió. */
-  onAnadir: (entrada: string) => boolean;
-  onQuitar: (frase: string) => void;
 }
 
 /**
  * Pestaña "Aprender": tocar melodías con el altavoz, ver qué nota es cada
- * letra, practicar frases y ajustar velocidad y voz.
+ * letra y ajustar cuánto dura cada nota al tocar.
  */
 export default function PestanaAprender(props: Props): React.JSX.Element {
-  const { mensaje, tocando, notaActual, ajustes, setAjustes, voces, personalizadas } =
-    props;
-  const [nuevaFrase, setNuevaFrase] = useState('');
-
-  const anadir = (): void => {
-    if (props.onAnadir(nuevaFrase)) setNuevaFrase('');
-  };
+  const { mensaje, tocando, notaActual, ajustes, setAjustes } = props;
 
   return (
     <>
@@ -74,6 +62,23 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
         )}
       </div>
 
+      <div className={estilos.ajustes}>
+        <label htmlFor="ajuste-duracion">
+          Duración de cada nota al tocar: <strong>{ajustes.duracionNotaMs} ms</strong>
+        </label>
+        <input
+          id="ajuste-duracion"
+          type="range"
+          min={LIMITES.duracionNotaMs.min}
+          max={LIMITES.duracionNotaMs.max}
+          step={LIMITES.duracionNotaMs.paso}
+          value={ajustes.duracionNotaMs}
+          onChange={(e) =>
+            setAjustes({ ...ajustes, duracionNotaMs: Number(e.target.value) })
+          }
+        />
+      </div>
+
       <div className={estilos.ahoraSuenaFila}>
         <div className={estilos.ahoraSuena}>
           {notaActual === null ? (
@@ -89,99 +94,6 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
           )}
         </div>
       </div>
-
-      <details className={estilos.tabla}>
-        <summary>Mis frases propias (nombre, medicación…)</summary>
-        <div className={estilos.nuevaFrase}>
-          <label htmlFor="nueva-frase">Añadir una frase propia</label>
-          <div className={estilos.nuevaFraseFila}>
-            <input
-              id="nueva-frase"
-              type="text"
-              maxLength={40}
-              value={nuevaFrase}
-              onChange={(e) => setNuevaFrase(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') anadir();
-              }}
-              placeholder="Ej. Me llamo Ana"
-            />
-            <button type="button" onClick={anadir} disabled={nuevaFrase.trim() === ''}>
-              Añadir
-            </button>
-          </div>
-          {personalizadas.length > 0 && (
-            <ul className={estilos.propias}>
-              {personalizadas.map((frase) => (
-                <li key={frase}>
-                  <span>{frase}</span>
-                  <button
-                    type="button"
-                    onClick={() => props.onQuitar(frase)}
-                    aria-label={`Quitar la frase ${frase}`}
-                  >
-                    Quitar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </details>
-
-      <details className={estilos.tabla}>
-        <summary>Ajustes (velocidad y voz)</summary>
-        <div className={estilos.ajustes}>
-          <label htmlFor="ajuste-duracion">
-            Duración de cada nota al tocar: <strong>{ajustes.duracionNotaMs} ms</strong>
-          </label>
-          <input
-            id="ajuste-duracion"
-            type="range"
-            min={LIMITES.duracionNotaMs.min}
-            max={LIMITES.duracionNotaMs.max}
-            step={LIMITES.duracionNotaMs.paso}
-            value={ajustes.duracionNotaMs}
-            onChange={(e) =>
-              setAjustes({ ...ajustes, duracionNotaMs: Number(e.target.value) })
-            }
-          />
-          <label htmlFor="ajuste-velocidad-voz">
-            Velocidad de la voz: <strong>{ajustes.velocidadVoz.toFixed(2)}×</strong>
-          </label>
-          <input
-            id="ajuste-velocidad-voz"
-            type="range"
-            min={LIMITES.velocidadVoz.min}
-            max={LIMITES.velocidadVoz.max}
-            step={LIMITES.velocidadVoz.paso}
-            value={ajustes.velocidadVoz}
-            onChange={(e) =>
-              setAjustes({ ...ajustes, velocidadVoz: Number(e.target.value) })
-            }
-          />
-          {voces.length > 0 && (
-            <>
-              <label htmlFor="ajuste-voz">Voz</label>
-              <select
-                id="ajuste-voz"
-                value={ajustes.vozNombre}
-                onChange={(e) => setAjustes({ ...ajustes, vozNombre: e.target.value })}
-              >
-                <option value="">Automática (mejor voz en español)</option>
-                {voces.map((nombre) => (
-                  <option key={nombre} value={nombre}>
-                    {nombre}
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
-          <button type="button" onClick={() => setAjustes({ ...AJUSTES_POR_DEFECTO })}>
-            Restablecer ajustes
-          </button>
-        </div>
-      </details>
 
       <details className={estilos.tabla}>
         <summary>Ver notas, signos y espacio (para afinar la guitarra)</summary>

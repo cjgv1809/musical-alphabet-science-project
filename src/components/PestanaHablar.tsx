@@ -1,7 +1,11 @@
 import { notasDeFrase } from '../audio/frases.ts';
 import type { LecturaTono } from '../audio/melodia.ts';
 import type { NivelSenal } from '../types/index.ts';
+import type { Dispatch, SetStateAction } from 'react';
+import type { Ajustes } from '../utils/ajustes.ts';
 import Afinador from './Afinador.tsx';
+import AjustesVoz from './AjustesVoz.tsx';
+import FrasesPropias from './FrasesPropias.tsx';
 import MedidorSnr from './MedidorSnr.tsx';
 import estilos from './InstrumentoPanel.module.css';
 
@@ -23,6 +27,12 @@ interface Props {
   onLimpiar: () => void;
   /** Frases esenciales y propias, para decirlas con un toque. */
   frases: string[];
+  personalizadas: string[];
+  onAnadir: (entrada: string) => boolean;
+  onQuitar: (frase: string) => void;
+  ajustes: Ajustes;
+  setAjustes: Dispatch<SetStateAction<Ajustes>>;
+  voces: string[];
   historial: string[];
   onDecir: (frase: string) => void;
   onBorrarHistorial: () => void;
@@ -30,7 +40,7 @@ interface Props {
 
 /**
  * Pestaña "Hablar": escuchar la guitarra, ver la transcripción y decirla en
- * voz alta. Es la pantalla de uso diario, así que lleva lo imprescindible.
+ * voz alta, con sus frases (rápidas y propias) y los ajustes de la voz.
  */
 export default function PestanaHablar(props: Props): React.JSX.Element {
   const { escuchando, texto, fraseDetectada, historial } = props;
@@ -160,6 +170,12 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
         </div>
       </section>
 
+      <FrasesPropias
+        personalizadas={props.personalizadas}
+        onAnadir={props.onAnadir}
+        onQuitar={props.onQuitar}
+      />
+
       <details className={estilos.tabla}>
         <summary>Historial (lo último que se dijo)</summary>
         {historial.length === 0 ? (
@@ -188,6 +204,12 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
           </>
         )}
       </details>
+
+      <AjustesVoz
+        ajustes={props.ajustes}
+        setAjustes={props.setAjustes}
+        voces={props.voces}
+      />
     </>
   );
 }

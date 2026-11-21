@@ -41,6 +41,28 @@ test.describe('flujo principal', () => {
   });
 });
 
+test.describe('secciones en su pestaña', () => {
+  test('frases propias y ajustes de voz están en Tocar y hablar', async ({ page }) => {
+    await page.goto('/');
+    await page.getByText('Mis frases propias').click();
+    await page.getByLabel('Añadir una frase propia').fill('Me llamo Ana');
+    await page.getByRole('button', { name: 'Añadir' }).click();
+    // La frase propia aparece junto a las rápidas, lista para decirse.
+    await expect(
+      page.getByRole('button', { name: /decir en voz alta: me llamo ana/i }),
+    ).toBeVisible();
+    await expect(page.getByText('Ajustes de voz')).toBeVisible();
+  });
+
+  test('Aprender solo lleva lo de tocar melodías', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('tab', { name: /aprender/i }).click();
+    await expect(page.getByLabel(/duración de cada nota/i)).toBeVisible();
+    await expect(page.getByText('Mis frases propias')).toBeHidden();
+    await expect(page.getByText('Ajustes de voz')).toBeHidden();
+  });
+});
+
 test.describe('PWA', () => {
   test('tras la primera visita la app carga sin conexión', async ({ page, context }) => {
     await page.goto('/');

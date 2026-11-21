@@ -2,7 +2,7 @@
  * Fraseario esencial (modo accesible).
  *
  * Idea: deletrear letra a letra es lento (~4 s por palabra corta).
- * Estas 10 frases cubren las necesidades urgentes y sociales básicas:
+ * Estas 11 frases cubren las necesidades urgentes y sociales básicas:
  * si lo transcrito (ignorando espacios —la guitarra no produce
  * espacios, solo silencios) coincide con una frase, la app la muestra
  * en grande y la HABLA en voz alta (ver `voz.ts`).
@@ -26,6 +26,7 @@ export const FRASES_ESENCIALES: readonly FraseEsencial[] = [
   { texto: 'BAÑO' },
   { texto: 'ME DUELE' },
   { texto: 'ADIÓS' },
+  { texto: 'TE QUIERO' },
 ] as const;
 
 /** Normaliza para comparar: mayúsculas y sin espacios ni tildes. */

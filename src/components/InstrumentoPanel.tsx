@@ -230,6 +230,12 @@ export default function InstrumentoPanel(): React.JSX.Element {
           onBorrarUltima={borrarUltima}
           onLimpiar={limpiarTexto}
           frases={[...FRASES_ESENCIALES.map((f) => f.texto), ...personalizadas]}
+          personalizadas={personalizadas}
+          onAnadir={anadirFrase}
+          onQuitar={quitarFrase}
+          ajustes={ajustes}
+          setAjustes={setAjustes}
+          voces={voces}
           historial={historial}
           onDecir={decirFrase}
           onBorrarHistorial={borrarHistorial}
@@ -251,10 +257,6 @@ export default function InstrumentoPanel(): React.JSX.Element {
           notaActual={notaActual}
           ajustes={ajustes}
           setAjustes={setAjustes}
-          voces={voces}
-          personalizadas={personalizadas}
-          onAnadir={anadirFrase}
-          onQuitar={quitarFrase}
         />
       </div>
     </section>

@@ -46,7 +46,7 @@ npm run build    # compilación de producción
    pulsada mantiene el tono casi fijo (tararear una nota perfectamente
    fija sí podría colarse).
 3. **Frases que hablan** 🔊: al deletrear una frase esencial (HOLA, SÍ, NO,
-   GRACIAS, POR FAVOR, AGUA, AYUDA, BAÑO, ME DUELE, ADIÓS) aparece en
+   GRACIAS, POR FAVOR, AGUA, AYUDA, BAÑO, ME DUELE, ADIÓS, TE QUIERO) aparece en
    grande y suena en voz alta. El botón 🔊 Hablar lee cualquier texto, y
    la parrilla de frases las dice al pulsarlas (cada una muestra sus
    notas para aprenderla). La guitarra no emite espacios: "MEDUELE" vale
