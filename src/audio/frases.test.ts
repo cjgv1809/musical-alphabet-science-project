@@ -49,11 +49,11 @@ describe('voz (elección de voz española)', () => {
   });
 
   it('textoParaVoz evita que "NO" se lea como "noroeste"', () => {
-    expect(textoParaVoz('NO')).toBe('No');
-    expect(textoParaVoz('ME DUELE')).toBe('Me Duele');
-    expect(textoParaVoz('SÍ')).toBe('Sí');
-    expect(textoParaVoz('HOLA.')).toBe('Hola.');
-    expect(textoParaVoz('¿CÓMO ESTÁS?')).toBe('¿Cómo Estás?');
+    expect(textoParaVoz('NO')).toBe('no');
+    expect(textoParaVoz('ME DUELE')).toBe('me duele');
+    expect(textoParaVoz('SÍ')).toBe('sí');
+    expect(textoParaVoz('HOLA.')).toBe('hola.');
+    expect(textoParaVoz('¿CÓMO ESTÁS?')).toBe('¿cómo estás?');
     // Minúsculas y letras sueltas no se tocan.
     expect(textoParaVoz('hola')).toBe('hola');
     expect(textoParaVoz('A')).toBe('A');

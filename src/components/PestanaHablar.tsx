@@ -1,3 +1,4 @@
+import { notasDeFrase } from '../audio/frases.ts';
 import type { LecturaTono } from '../audio/melodia.ts';
 import type { NivelSenal } from '../types/index.ts';
 import Afinador from './Afinador.tsx';
@@ -20,6 +21,8 @@ interface Props {
   onCompartir: () => void;
   onBorrarUltima: () => void;
   onLimpiar: () => void;
+  /** Frases esenciales y propias, para decirlas con un toque. */
+  frases: string[];
   historial: string[];
   onDecir: (frase: string) => void;
   onBorrarHistorial: () => void;
@@ -134,6 +137,28 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
           acordes rasgueados no se leen (suenan varias notas a la vez).
         </p>
       )}
+
+      <section className={estilos.frasesRapidas} aria-labelledby="titulo-frases-rapidas">
+        <h3 id="titulo-frases-rapidas">Frases rápidas</h3>
+        <p className={estilos.ayuda}>
+          Tócalas o deletréalas con la guitarra, o pulsa una para decirla. Debajo de cada
+          una están sus notas.
+        </p>
+        <div className={estilos.frasesGrid}>
+          {props.frases.map((frase) => (
+            <button
+              key={frase}
+              type="button"
+              className={estilos.fraseBtn}
+              onClick={() => props.onDecir(frase)}
+              aria-label={`Decir en voz alta: ${frase}. Notas: ${notasDeFrase(frase)}`}
+            >
+              <span>{frase}</span>
+              <small>{notasDeFrase(frase)}</small>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <details className={estilos.tabla}>
         <summary>Historial (lo último que se dijo)</summary>

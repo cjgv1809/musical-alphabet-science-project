@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
-import { FRASES_ESENCIALES, normalizarFrase } from '../audio/frases.ts';
 import { AJUSTES_POR_DEFECTO, LIMITES, type Ajustes } from '../utils/ajustes.ts';
 import TablaNotas from './TablaNotas.tsx';
 import estilos from './InstrumentoPanel.module.css';
@@ -20,12 +19,7 @@ interface Props {
   /** Intenta añadir una frase propia; true si se añadió. */
   onAnadir: (entrada: string) => boolean;
   onQuitar: (frase: string) => void;
-  onDecir: (frase: string) => void;
 }
-
-/** Secuencia de notas de una frase (para aprenderla en la guitarra). */
-const notasDe = (frase: string): string =>
-  [...normalizarFrase(frase)].map((c) => obtenerNombreNota(c) ?? '?').join(' · ');
 
 /**
  * Pestaña "Aprender": tocar melodías con el altavoz, ver qué nota es cada
@@ -97,26 +91,9 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
       </div>
 
       <details className={estilos.tabla}>
-        <summary>Frases rápidas (se hablan solas al deletrearlas)</summary>
-        <div className={estilos.frasesGrid}>
-          {[...FRASES_ESENCIALES.map((f) => f.texto), ...personalizadas].map((frase) => (
-            <button
-              key={frase}
-              type="button"
-              className={estilos.fraseBtn}
-              onClick={() => props.onDecir(frase)}
-              aria-label={`Decir en voz alta: ${frase}. Notas: ${notasDe(frase)}`}
-            >
-              <span>{frase}</span>
-              <small>{notasDe(frase)}</small>
-            </button>
-          ))}
-        </div>
-
+        <summary>Mis frases propias (nombre, medicación…)</summary>
         <div className={estilos.nuevaFrase}>
-          <label htmlFor="nueva-frase">
-            Añadir tu propia frase (nombre, medicación…)
-          </label>
+          <label htmlFor="nueva-frase">Añadir una frase propia</label>
           <div className={estilos.nuevaFraseFila}>
             <input
               id="nueva-frase"

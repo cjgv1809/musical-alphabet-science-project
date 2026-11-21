@@ -62,7 +62,7 @@ export interface DetectorDeSimbolos {
 // Variación máxima del tono (cents, de la ventana más grave a la más aguda)
 // dentro de una misma nota. La cuerda pulsada sube unos 10–15 cents solo en
 // el ataque; la voz hablada se mueve bastante más y de forma continua.
-const MAX_DERIVA_CENTS = 25;
+const MAX_DERIVA_CENTS = 12;
 
 // RMS a partir del cual hay "sonido de verdad" (no silencio).
 const UMBRAL_SONIDO_FUERTE = 0.05;

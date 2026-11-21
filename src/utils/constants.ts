@@ -25,13 +25,13 @@ export const TAMANO_VENTANA = 1024;
 // Duración mínima (ms) que un símbolo debe mantenerse para validarse.
 // Mitiga ruidos impulsivos (un golpe dura <50 ms) y sílabas habladas: una
 // nota de guitarra se sostiene bastante más que una sílaba con tono fijo.
-export const DURACION_MINIMA_MS = 100;
+export const DURACION_MINIMA_MS = 80;
 
 // N.º de ventanas consecutivas (con tono estable) para aceptar el símbolo.
-// Con ventanas cada 40 ms, 4 ventanas son unos 120 ms.
-export const VENTANAS_CONSECUTIVAS = 4;
+// Con ventanas cada 40 ms, 3 ventanas son unos 80 ms.
+export const VENTANAS_CONSECUTIVAS = 3;
 
 // Duración de cada símbolo al "tocar" (ms): fija, sin control de velocidad.
-// 500 ms dan margen de sobra al decodificador (confirma en ~120 ms).
+// 500 ms dan margen de sobra al decodificador (confirma en ~80 ms).
 export const DURACION_SIMBOLO_MS = 500;
 export const PAUSA_ENTRE_SIMBOLOS_MS = 60;

@@ -6,7 +6,7 @@
  * - Navegación y demás: primero la red, y si falla, la caché.
  * Al publicar una versión nueva, sube VERSION para limpiar cachés viejas.
  */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `notas-que-hablan-${VERSION}`;
 
 self.addEventListener('install', (evento) => {

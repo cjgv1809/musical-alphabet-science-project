@@ -8,6 +8,8 @@
  * en grande y la HABLA en voz alta (ver `voz.ts`).
  */
 
+import { obtenerNombreNota } from './cromatico.ts';
+
 export interface FraseEsencial {
   /** Texto natural (se habla tal cual). */
   texto: string;
@@ -71,4 +73,9 @@ export function sugerirFrases(
     }
   }
   return salida;
+}
+
+/** Secuencia de notas de una frase (para aprenderla en la guitarra). */
+export function notasDeFrase(frase: string): string {
+  return [...normalizarFrase(frase)].map((c) => obtenerNombreNota(c) ?? '?').join(' · ');
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DetectorMelodia } from './melodia.ts';
 import { normalizarSimboloCromatico, obtenerFrecuenciaNota } from './cromatico.ts';
 import { TAMANO_VENTANA } from '../utils/constants.ts';
+import { FRASES_ESENCIALES, normalizarFrase } from './frases.ts';
 
 /**
  * Tests del modo instrumento de punta a punta.
@@ -228,6 +229,13 @@ describe('melodia (instrumento → texto)', () => {
   });
 
   describe('solo guitarra (rechaza la voz)', () => {
+    it('todas las frases esenciales se reconocen tocando rápido (150 ms por nota)', () => {
+      for (const frase of FRASES_ESENCIALES) {
+        const clave = normalizarFrase(frase.texto);
+        expect(transcribir(sintetizarMelodia(clave, 150, 40, GUITARRA))).toBe(clave);
+      }
+    });
+
     it('una cuerda pulsada real (ataque con glide y decaimiento) sí se transcribe', () => {
       const trozos = [...'HOLA'].flatMap((c) => [
         sintetizarCuerdaPulsada(obtenerFrecuenciaNota(c) ?? 0, 600),

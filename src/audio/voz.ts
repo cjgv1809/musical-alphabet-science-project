@@ -30,15 +30,17 @@ export function elegirVozEspanola(voces: readonly VozDisponible[]): number {
 }
 
 /**
- * Pasa un texto a ortografía natural para la voz ("NO" → "No",
- * "ME DUELE" → "Me duele"). Imprescindible: la síntesis en español
+ * Pasa un texto a ortografía natural para la voz ("NO" → "no",
+ * "ME DUELE" → "me duele"). Imprescindible: la síntesis en español
  * interpreta "NO" en mayúsculas como la abreviatura de "noroeste"
- * (punto cardinal) y lo dice mal. Las minúsculas no se tocan y las
- * letras sueltas ("A") se conservan para que se deletreen.
+ * (punto cardinal), y con solo la inicial en mayúscula ("No") algunas
+ * voces aún lo toman por la abreviatura de "número". En minúsculas es
+ * simplemente la palabra. Las letras sueltas ("A") se conservan en
+ * mayúscula para que se deletreen.
  */
 export function textoParaVoz(texto: string): string {
   return texto.replace(/[A-ZÁÉÍÓÚÜÑ]+/g, (palabra) =>
-    palabra.length <= 1 ? palabra : (palabra[0] ?? '') + palabra.slice(1).toLowerCase(),
+    palabra.length <= 1 ? palabra : palabra.toLowerCase(),
   );
 }
 

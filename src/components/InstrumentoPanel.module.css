@@ -462,3 +462,12 @@
 .ahoraSuenaFila {
   margin-top: 0.8rem;
 }
+
+.frasesRapidas {
+  margin-top: 1rem;
+}
+
+.frasesRapidas h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}

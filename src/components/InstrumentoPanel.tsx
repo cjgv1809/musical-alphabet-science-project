@@ -229,6 +229,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
           onCompartir={() => void compartirTexto()}
           onBorrarUltima={borrarUltima}
           onLimpiar={limpiarTexto}
+          frases={[...FRASES_ESENCIALES.map((f) => f.texto), ...personalizadas]}
           historial={historial}
           onDecir={decirFrase}
           onBorrarHistorial={borrarHistorial}
@@ -254,7 +255,6 @@ export default function InstrumentoPanel(): React.JSX.Element {
           personalizadas={personalizadas}
           onAnadir={anadirFrase}
           onQuitar={quitarFrase}
-          onDecir={decirFrase}
         />
       </div>
     </section>
