@@ -40,8 +40,11 @@ npm run build    # compilación de producción
    melodía_. Cada letra suena 500 ms como un seno puro en su nota
    cromática; la nota actual se muestra en grande con su nombre y Hz.
 2. **Escuchar melodía** 🎧: pulsa _Escuchar melodía_ y toca las notas con
-   la guitarra, flauta o voz (una cada vez, sostenida ~500 ms, afinada).
-   Las letras aparecen en vivo con la SNR en dB.
+   la guitarra (una cuerda cada vez, sostenida ~500 ms, afinada). Las
+   letras aparecen en vivo con la SNR en dB. **Solo guitarra:** la voz
+   hablada se descarta porque su tono se desliza, mientras que una cuerda
+   pulsada mantiene el tono casi fijo (tararear una nota perfectamente
+   fija sí podría colarse).
 3. **Frases que hablan** 🔊: al deletrear una frase esencial (HOLA, SÍ, NO,
    GRACIAS, POR FAVOR, AGUA, AYUDA, BAÑO, ME DUELE, ADIÓS) aparece en
    grande y suena en voz alta. El botón 🔊 Hablar lee cualquier texto, y

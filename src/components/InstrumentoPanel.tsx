@@ -20,8 +20,8 @@ const RETRASO_FRASE_MS = 1200;
 const MAX_TEXTO = 200;
 
 const PESTANAS: readonly Pestana[] = [
-  { id: 'hablar', etiqueta: 'Hablar', icono: '🎤' },
-  { id: 'aprender', etiqueta: 'Aprender', icono: '🎸' },
+  { id: 'hablar', etiqueta: 'Tocar y hablar', icono: '🎸' },
+  { id: 'aprender', etiqueta: 'Aprender', icono: '📖' },
 ];
 
 /**

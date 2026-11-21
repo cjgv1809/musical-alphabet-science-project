@@ -106,6 +106,55 @@ function transcribir(senal: Float32Array): string {
 
 const GUITARRA = [1, 0.5, 0.25, 0.12] as const;
 
+/**
+ * Sintetiza con frecuencia y amplitud que varían en el tiempo (fase
+ * acumulada, para que el deslizamiento de tono sea continuo).
+ */
+function sintetizarVariable(
+  frecuenciaEn: (tSeg: number) => number,
+  amplitudEn: (tSeg: number) => number,
+  duracionMs: number,
+  armonicos: readonly number[],
+): Float32Array {
+  const n = Math.round((duracionMs * SAMPLE_RATE) / 1000);
+  const muestras = new Float32Array(n);
+  let fase = 0;
+  for (let i = 0; i < n; i += 1) {
+    const t = i / SAMPLE_RATE;
+    fase += (2 * Math.PI * frecuenciaEn(t)) / SAMPLE_RATE;
+    let valor = 0;
+    for (let k = 0; k < armonicos.length; k += 1) {
+      valor += (armonicos[k] ?? 0) * Math.sin(fase * (k + 1));
+    }
+    muestras[i] = 0.4 * amplitudEn(t) * valor;
+  }
+  return muestras;
+}
+
+/** Cuerda pulsada: tono casi fijo (sube ~14 cents en el ataque) y decae. */
+function sintetizarCuerdaPulsada(frecuencia: number, duracionMs: number): Float32Array {
+  return sintetizarVariable(
+    (t) => frecuencia * (1 + 0.008 * Math.exp(-t / 0.03)),
+    (t) => Math.exp(-t / 0.6),
+    duracionMs,
+    GUITARRA,
+  );
+}
+
+/**
+ * Voz hablada sintética: armónicos tipo vocal, tono que se desliza por la
+ * entonación (≈ medio tono cada 100 ms), vibrato leve y ritmo de sílabas.
+ */
+function sintetizarVozHablada(duracionMs: number, inicioHz: number): Float32Array {
+  return sintetizarVariable(
+    (t) =>
+      inicioHz * Math.pow(2, (6 * t) / 12) * (1 + 0.01 * Math.sin(2 * Math.PI * 5.5 * t)),
+    (t) => 0.6 + 0.4 * Math.sin(2 * Math.PI * 4 * t),
+    duracionMs,
+    [1, 0.9, 0.7, 0.5, 0.35, 0.2, 0.1],
+  );
+}
+
 describe('melodia (instrumento → texto)', () => {
   it('"HOLA" en senos puros se transcribe exacto', () => {
     expect(transcribir(sintetizarMelodia('HOLA', 500, 60))).toBe('HOLA');
@@ -166,7 +215,9 @@ describe('melodia (instrumento → texto)', () => {
     expect(lectura?.cents).toBeGreaterThan(10);
     expect(lectura?.cents).toBeLessThan(30);
     expect(lectura?.confirmada).toBe(false);
-    det.procesar(sintetizarNota(f, TAMANO_VENTANA), SAMPLE_RATE, 60);
+    for (const t of [40, 80, 120]) {
+      det.procesar(sintetizarNota(f, TAMANO_VENTANA), SAMPLE_RATE, t);
+    }
     expect(det.leerTono()?.confirmada).toBe(true);
   });
 
@@ -174,5 +225,39 @@ describe('melodia (instrumento → texto)', () => {
     const det = new DetectorMelodia();
     det.procesar(new Float32Array(TAMANO_VENTANA), SAMPLE_RATE, 0);
     expect(det.leerTono()).toBeNull();
+  });
+
+  describe('solo guitarra (rechaza la voz)', () => {
+    it('una cuerda pulsada real (ataque con glide y decaimiento) sí se transcribe', () => {
+      const trozos = [...'HOLA'].flatMap((c) => [
+        sintetizarCuerdaPulsada(obtenerFrecuenciaNota(c) ?? 0, 600),
+        new Float32Array(Math.round((200 * SAMPLE_RATE) / 1000)),
+      ]);
+      const total = trozos.reduce((a, t) => a + t.length, 0);
+      const senal = new Float32Array(total);
+      let offset = 0;
+      for (const t of trozos) {
+        senal.set(t, offset);
+        offset += t.length;
+      }
+      expect(transcribir(senal)).toBe('HOLA');
+    });
+
+    it('la voz hablada (tono que se desliza) no genera letras', () => {
+      for (const inicio of [110, 140, 180, 220]) {
+        expect(transcribir(sintetizarVozHablada(2500, inicio))).toBe('');
+      }
+    });
+
+    it('habla seguida de guitarra: solo se transcribe la guitarra', () => {
+      const voz = sintetizarVozHablada(1500, 130);
+      const pausa = new Float32Array(Math.round((200 * SAMPLE_RATE) / 1000));
+      const guitarra = sintetizarCuerdaPulsada(obtenerFrecuenciaNota('H') ?? 0, 600);
+      const senal = new Float32Array(voz.length + pausa.length + guitarra.length);
+      senal.set(voz, 0);
+      senal.set(pausa, voz.length);
+      senal.set(guitarra, voz.length + pausa.length);
+      expect(transcribir(senal)).toBe('H');
+    });
   });
 });

@@ -7,8 +7,15 @@ import { estimarFrecuenciaFundamental } from './tonoFundamental.ts';
  *
  * Cadena por ventana: estima la fundamental (YIN) → la redondea a la
  * letra más cercana (±45 cents) → exige confirmación temporal:
- * 2 ventanas seguidas + 50 ms mínimos, y una sola
- * emisión por nota sostenida (la repetición exige un silencio intermedio).
+ * varias ventanas seguidas con el tono ESTABLE, y una sola emisión por
+ * nota sostenida (la repetición exige un silencio intermedio).
+ *
+ * Solo guitarra (no voz): una cuerda pulsada mantiene su tono casi
+ * inmóvil (unos pocos cents), mientras que la voz hablada se desliza
+ * continuamente (la entonación cambia decenas de cents en 100 ms). Si el
+ * tono se mueve más de `MAX_DERIVA_CENTS` dentro de la misma nota, se
+ * reinicia el conteo y no se confirma. Límite conocido: una voz que
+ * sostenga un tono perfectamente fijo (tararear una nota) sí pasaría.
  *
  * Limitación conocida del prototipo: ventanas fijas cada 40 ms, así que
  * quien toque (persona o emisor) debe sostener cada nota ~500 ms con
@@ -52,6 +59,11 @@ export interface DetectorDeSimbolos {
   leerTono?(): LecturaTono | null;
 }
 
+// Variación máxima del tono (cents, de la ventana más grave a la más aguda)
+// dentro de una misma nota. La cuerda pulsada sube unos 10–15 cents solo en
+// el ataque; la voz hablada se mueve bastante más y de forma continua.
+const MAX_DERIVA_CENTS = 25;
+
 // RMS a partir del cual hay "sonido de verdad" (no silencio).
 const UMBRAL_SONIDO_FUERTE = 0.05;
 // Ventanas seguidas de sonido-sin-nota antes de avisar (≈ 320 ms).
@@ -70,6 +82,8 @@ export class DetectorMelodia implements DetectorDeSimbolos {
   private candidata: string | null = null;
   private ventanasSeguidas = 0;
   private inicioCandidataMs = 0;
+  private centsMin = 0;
+  private centsMax = 0;
   private ultimoEmitido: string | null = null;
   private rachaSinTono = 0;
   private lectura: LecturaTono | null = null;
@@ -78,6 +92,15 @@ export class DetectorMelodia implements DetectorDeSimbolos {
     this.candidata = null;
     this.ventanasSeguidas = 0;
     this.ultimoEmitido = null;
+  }
+
+  /** Empieza a contar una nota nueva desde esta ventana. */
+  private iniciarCandidata(simbolo: string, cents: number, ahoraMs: number): void {
+    this.candidata = simbolo;
+    this.ventanasSeguidas = 1;
+    this.inicioCandidataMs = ahoraMs;
+    this.centsMin = cents;
+    this.centsMax = cents;
   }
 
   procesar(
@@ -111,13 +134,18 @@ export class DetectorMelodia implements DetectorDeSimbolos {
     }
     this.rachaSinTono = 0;
 
-    // 2. Confirmación temporal: 2 ventanas seguidas + 50 ms mínimos.
+    // 2. Confirmación temporal con tono estable (ver cabecera: guitarra, no voz).
     if (nota.simbolo === this.candidata) {
-      this.ventanasSeguidas += 1;
+      this.centsMin = Math.min(this.centsMin, nota.cents);
+      this.centsMax = Math.max(this.centsMax, nota.cents);
+      if (this.centsMax - this.centsMin > MAX_DERIVA_CENTS) {
+        // El tono se desliza (voz, glissando): vuelve a empezar la cuenta.
+        this.iniciarCandidata(nota.simbolo, nota.cents, ahoraMs);
+      } else {
+        this.ventanasSeguidas += 1;
+      }
     } else {
-      this.candidata = nota.simbolo;
-      this.ventanasSeguidas = 1;
-      this.inicioCandidataMs = ahoraMs;
+      this.iniciarCandidata(nota.simbolo, nota.cents, ahoraMs);
     }
     const tiempoSostenido = ahoraMs - this.inicioCandidataMs;
     const confirmada =

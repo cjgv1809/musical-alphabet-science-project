@@ -44,9 +44,9 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
     <>
       <p className={estilos.ayuda}>
         Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…): toca la
-        melodía aquí o con una guitarra/flauta/voz afinada, de una nota cada vez. Si
-        completas una frase esencial, la app la dice en voz alta. Espacio = cuerda RE al
-        aire (146.83 Hz).
+        melodía aquí o con una guitarra afinada, de una cuerda cada vez. Si completas una
+        frase esencial, la app la dice en voz alta. Espacio = cuerda RE al aire (146.83
+        Hz).
       </p>
 
       <label className={estilos.etiqueta} htmlFor="campo-melodia">

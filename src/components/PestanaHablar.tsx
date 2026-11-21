@@ -33,6 +33,12 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
   const { escuchando, texto, fraseDetectada, historial } = props;
   return (
     <>
+      <p className={estilos.ayuda}>
+        Toca con la guitarra, <strong>una nota por letra</strong>, cerca del micrófono: la
+        app las escribe y <strong>dice la frase en voz alta</strong>. Solo escucha la
+        guitarra; las voces se ignoran.
+      </p>
+
       <div className={estilos.botones}>
         {!escuchando ? (
           <button type="button" className={estilos.tocar} onClick={props.onEmpezar}>

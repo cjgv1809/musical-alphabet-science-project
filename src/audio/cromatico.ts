@@ -3,8 +3,8 @@
  *
  * Idea: en vez de DOS senos por letra (DTMF, solo para aparatos), UNA
  * nota musical por letra en escala cromática (semitonos), como una
- * melodía. Cualquier instrumento monofónico (guitarra, flauta, voz)
- * puede "hablar" tocando la melodía, y el detector de tono fundamental
+ * melodía. Una guitarra tocada cuerda a cuerda puede "hablar" tocando
+ * la melodía (la voz se descarta, ver `melodia.ts`), y el detector de tono fundamental
  * (`tonoFundamental.ts`) la transcribe sin importar el timbre.
  *
  * Diseño:

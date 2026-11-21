@@ -4,7 +4,7 @@
  * Física involucrada:
  * - El micrófono se filtra entre 100 y 3000 Hz: deja pasar todas las notas
  *   (146.83–932 Hz) y evita el ruido grave (<100 Hz: ventiladores, pasos).
- * - La duración mínima de 50 ms por símbolo evita que ruidos impulsivos
+ * - La duración mínima por símbolo (100 ms) evita que ruidos impulsivos
  *   (palmadas, golpes) se confundan con una letra.
  */
 
@@ -23,13 +23,15 @@ export const FRECUENCIA_MAXIMA = 3000;
 export const TAMANO_VENTANA = 1024;
 
 // Duración mínima (ms) que un símbolo debe mantenerse para validarse.
-// Mitiga ruidos impulsivos: un golpe dura <50 ms, una letra real dura más.
-export const DURACION_MINIMA_MS = 50;
+// Mitiga ruidos impulsivos (un golpe dura <50 ms) y sílabas habladas: una
+// nota de guitarra se sostiene bastante más que una sílaba con tono fijo.
+export const DURACION_MINIMA_MS = 100;
 
-// N.º de ventanas consecutivas con la misma detección para aceptar el símbolo.
-export const VENTANAS_CONSECUTIVAS = 2;
+// N.º de ventanas consecutivas (con tono estable) para aceptar el símbolo.
+// Con ventanas cada 40 ms, 4 ventanas son unos 120 ms.
+export const VENTANAS_CONSECUTIVAS = 4;
 
 // Duración de cada símbolo al "tocar" (ms): fija, sin control de velocidad.
-// 500 ms dan margen de sobra al decodificador (confirma en ~80 ms).
+// 500 ms dan margen de sobra al decodificador (confirma en ~120 ms).
 export const DURACION_SIMBOLO_MS = 500;
 export const PAUSA_ENTRE_SIMBOLOS_MS = 60;
