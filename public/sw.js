@@ -6,7 +6,7 @@
  * - Navegación y demás: primero la red, y si falla, la caché.
  * Al publicar una versión nueva, sube VERSION para limpiar cachés viejas.
  */
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = `notas-que-hablan-${VERSION}`;
 
 self.addEventListener('install', (evento) => {
@@ -20,7 +20,7 @@ self.addEventListener('install', (evento) => {
       // Rutas relativas (./assets/xxx.js) resueltas contra el alcance.
       const recursos = [
         ...html.matchAll(
-          /(?:src|href)="(\.?\/?(?:assets\/|favicon|manifest|icon)[^"]*)"/g,
+          /(?:src|href)="(\.?\/?(?:assets\/|favicon|manifest|icon|apple-touch-icon)[^"]*)"/g,
         ),
       ].map((m) => new URL(m[1], base).href);
       await cache.addAll([...new Set(recursos)]);
@@ -43,6 +43,17 @@ self.addEventListener('activate', (evento) => {
   );
 });
 
+/* Guarda solo respuestas completas y correctas (200): un 404/500 pasajero o
+ * una respuesta parcial (206) no deben quedar como copia "buena" para siempre. */
+function guardar(peticion, respuesta) {
+  if (respuesta.status !== 200) return;
+  const copia = respuesta.clone();
+  void caches
+    .open(CACHE)
+    .then((c) => c.put(peticion, copia))
+    .catch(() => undefined);
+}
+
 self.addEventListener('fetch', (evento) => {
   const peticion = evento.request;
   if (peticion.method !== 'GET') return;
@@ -56,8 +67,7 @@ self.addEventListener('fetch', (evento) => {
         (guardado) =>
           guardado ||
           fetch(peticion).then((red) => {
-            const copia = red.clone();
-            void caches.open(CACHE).then((c) => c.put(peticion, copia));
+            guardar(peticion, red);
             return red;
           }),
       ),
@@ -69,8 +79,7 @@ self.addEventListener('fetch', (evento) => {
   evento.respondWith(
     fetch(peticion)
       .then((red) => {
-        const copia = red.clone();
-        void caches.open(CACHE).then((c) => c.put(peticion, copia));
+        guardar(peticion, red);
         return red;
       })
       .catch(() =>
