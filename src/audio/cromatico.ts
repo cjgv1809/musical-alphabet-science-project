@@ -117,8 +117,8 @@ export function centsEntre(f1: number, f2: number): number {
 }
 
 /**
- * Normaliza un carácter del modo instrumento: mayúsculas y signos tal
- * cual; el espacio se conserva como silencio. El resto → `null`.
+ * Normaliza un carácter del modo instrumento: mayúsculas (sin tildes ni
+ * Ñ→N) y signos tal cual; el espacio se conserva como silencio. El resto → `null`.
  */
 export function normalizarSimboloCromatico(caracter: string): string | null {
   if (caracter.length === 0) return null;
@@ -126,7 +126,11 @@ export function normalizarSimboloCromatico(caracter: string): string | null {
   if ((SIMBOLOS_PUNTUACION as readonly string[]).includes(caracter)) {
     return caracter;
   }
-  const mayuscula = caracter.toUpperCase();
+  // Sin tildes ni virgulilla, como `normalizarFrase`: SÍ → S I, BAÑO → B A N O.
+  const mayuscula = caracter
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase();
   return (SIMBOLOS_CROMATICOS as readonly string[]).includes(mayuscula)
     ? mayuscula
     : null;

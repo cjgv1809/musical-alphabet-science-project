@@ -35,7 +35,16 @@ describe('cromatico (una nota por letra)', () => {
   it('normaliza minúsculas y rechaza caracteres no soportados', () => {
     expect(normalizarSimboloCromatico('h')).toBe('H');
     expect(normalizarSimboloCromatico('5')).toBe(null);
-    expect(normalizarSimboloCromatico('ñ')).toBe(null);
+    expect(normalizarSimboloCromatico('€')).toBe(null);
+  });
+
+  it('las tildes y la Ñ suenan como su letra base (SÍ, BAÑO, ADIÓS)', () => {
+    const notas = (texto: string): string =>
+      [...texto].map((c) => normalizarSimboloCromatico(c)).join('');
+    expect(notas('SÍ')).toBe('SI');
+    expect(notas('BAÑO')).toBe('BANO');
+    expect(notas('ADIÓS')).toBe('ADIOS');
+    expect(notas('pingüino')).toBe('PINGUINO');
   });
 
   it('el espacio es RE3 (146.83 Hz, cuerda RE al aire)', () => {
