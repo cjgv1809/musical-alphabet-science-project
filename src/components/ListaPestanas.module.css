@@ -1,0 +1,38 @@
+/* Pestañas (patrón WAI-ARIA tabs). */
+.pestanas {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0.9rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.pestana {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-height: 48px;
+  padding: 0.5rem 0.5rem;
+  font-size: clamp(0.95rem, 4vw, 1.05rem);
+  font-weight: 700;
+  color: var(--ink);
+  background: transparent;
+  border: 2px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: pointer;
+  margin-bottom: -2px;
+}
+
+.pestana[aria-selected='true'] {
+  background: var(--card);
+  border-color: var(--border);
+  border-bottom: 2px solid var(--card);
+  color: var(--accent-inst-text);
+}
+
+.pestana svg {
+  flex-shrink: 0;
+  font-size: 1.15em;
+}

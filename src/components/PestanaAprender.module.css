@@ -1,0 +1,49 @@
+.etiqueta {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.texto {
+  display: block;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.45rem 0.6rem;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 1.1rem;
+  width: 100%;
+  max-width: 22rem;
+  text-transform: uppercase;
+}
+
+.texto:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* Nota que suena (solo aparece mientras suena una nota). */
+.ahoraSuenaFila {
+  margin-top: 0.8rem;
+}
+
+.ahoraSuena {
+  min-height: 3.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--display);
+}
+
+.nota {
+  color: #ffd166;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.nota small {
+  font-size: 0.85rem;
+  font-weight: 400;
+}

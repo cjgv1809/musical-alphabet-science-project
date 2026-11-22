@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
-import estilos from './InstrumentoPanel.module.css';
+import estilos from './ListaPestanas.module.css';
 
 export interface Pestana {
   id: string;

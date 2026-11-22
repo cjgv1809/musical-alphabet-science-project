@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { AJUSTES_POR_DEFECTO, LIMITES, type Ajustes } from '../utils/ajustes.ts';
-import estilos from './InstrumentoPanel.module.css';
+import comun from './compartido.module.css';
 
 interface Props {
   ajustes: Ajustes;
@@ -15,9 +15,9 @@ export default function AjustesVoz({
   voces,
 }: Props): React.JSX.Element {
   return (
-    <details className={estilos.tabla}>
+    <details className={comun.desplegable}>
       <summary>Ajustes de voz</summary>
-      <div className={estilos.ajustes}>
+      <div className={comun.controles}>
         <label htmlFor="ajuste-velocidad-voz">
           Velocidad de la voz:{' '}
           <strong>{ajustes.velocidadVoz.toFixed(2).replace('.', ',')}×</strong>

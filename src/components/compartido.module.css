@@ -1,0 +1,169 @@
+/* Piezas visuales compartidas por varios componentes. Lo que es de un solo
+ * componente vive en su propio módulo (`Componente.module.css`).
+ */
+
+.ayuda {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* Fila de botones de acción; `.tocar` es la acción principal. */
+.botones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.botones button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  font-size: 1rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent);
+  background: var(--field);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+@media (hover: hover) {
+  .botones button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+}
+
+.botones button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.botones .tocar {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+
+/* Iconos (Phosphor): heredan el color del texto y escalan con él. */
+.botones svg {
+  flex-shrink: 0;
+  font-size: 1.15em;
+}
+
+/* Sección desplegable (<details>) con chevron; también estiliza tablas internas. */
+.desplegable {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.desplegable summary {
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+}
+
+.desplegable summary::-webkit-details-marker {
+  display: none;
+}
+
+.desplegable summary::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid var(--accent-inst-text);
+  border-bottom: 2px solid var(--accent-inst-text);
+  transform: rotate(-45deg);
+  transition: transform 150ms ease;
+}
+
+.desplegable[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.desplegable table {
+  width: 100%;
+  max-width: 24rem;
+  border-collapse: collapse;
+  margin-top: 0.4rem;
+}
+
+.desplegable th,
+.desplegable td {
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Botón en píldora (sugerencias, añadir/quitar, decir). */
+.pildora {
+  min-height: 44px;
+  padding: 0.3rem 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent);
+  background: var(--field);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.pildora:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Lista de filas "texto + acción". */
+.lista {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.lista li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Grupo de controles de ajuste (deslizadores, selector, restablecer). */
+.controles {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 24rem;
+  margin-top: 0.4rem;
+}
+
+.controles input[type='range'] {
+  accent-color: var(--accent-inst);
+  width: 100%;
+  min-height: 32px;
+}
+
+.controles select,
+.controles button {
+  min-height: 44px;
+  font-size: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--field);
+  color: var(--ink);
+  padding: 0.4rem 0.6rem;
+}
+
+.controles button {
+  cursor: pointer;
+}

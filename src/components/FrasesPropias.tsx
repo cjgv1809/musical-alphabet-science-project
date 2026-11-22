@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import estilos from './InstrumentoPanel.module.css';
+import comun from './compartido.module.css';
+import estilos from './FrasesPropias.module.css';
 
 interface Props {
   personalizadas: string[];
@@ -21,11 +22,11 @@ export default function FrasesPropias({
   };
 
   return (
-    <details className={estilos.tabla}>
+    <details className={comun.desplegable}>
       <summary>Mis frases propias</summary>
       <div className={estilos.nuevaFrase}>
         <label htmlFor="nueva-frase">Añadir una frase propia</label>
-        <p className={estilos.ayuda}>
+        <p className={comun.ayuda}>
           Por ejemplo tu nombre o tu medicación. Aparecerán entre las frases rápidas.
         </p>
         <div className={estilos.nuevaFraseFila}>
@@ -40,17 +41,23 @@ export default function FrasesPropias({
             }}
             placeholder="Ej. Me llamo Ana"
           />
-          <button type="button" onClick={anadir} disabled={nuevaFrase.trim() === ''}>
+          <button
+            type="button"
+            className={comun.pildora}
+            onClick={anadir}
+            disabled={nuevaFrase.trim() === ''}
+          >
             Añadir
           </button>
         </div>
         {personalizadas.length > 0 && (
-          <ul className={estilos.propias}>
+          <ul className={comun.lista}>
             {personalizadas.map((frase) => (
               <li key={frase}>
                 <span>{frase}</span>
                 <button
                   type="button"
+                  className={comun.pildora}
                   onClick={() => onQuitar(frase)}
                   aria-label={`Quitar la frase ${frase}`}
                 >

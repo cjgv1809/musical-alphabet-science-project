@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { LecturaTono } from '../audio/melodia.ts';
 import { obtenerNombreNota } from '../audio/cromatico.ts';
-import estilos from './InstrumentoPanel.module.css';
+import estilos from './Afinador.module.css';
 
 /** Cents que cubre la barra a cada lado del centro. */
 const RANGO_CENTS = 50;

@@ -1,0 +1,7 @@
+/* Medidor fuera de la región viva: se lee a demanda, no se anuncia. */
+.snr {
+  grid-column: 1 / -1;
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}

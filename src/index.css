@@ -97,3 +97,8 @@ summary:focus-visible {
     animation: none !important;
   }
 }
+
+/* Selección de texto con la marca. */
+::selection {
+  background: color-mix(in srgb, var(--accent-inst) 30%, transparent);
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { NivelSenal } from '../types/index.ts';
-import estilos from './InstrumentoPanel.module.css';
+import estilos from './MedidorSnr.module.css';
 
 /**
  * Medidor de señal/ruido con estado PROPIO.

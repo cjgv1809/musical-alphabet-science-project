@@ -3,7 +3,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
 import { LIMITES, type Ajustes } from '../utils/ajustes.ts';
 import TablaNotas from './TablaNotas.tsx';
-import estilos from './InstrumentoPanel.module.css';
+import comun from './compartido.module.css';
+import estilos from './PestanaAprender.module.css';
 
 interface Props {
   mensaje: string;
@@ -25,7 +26,7 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
 
   return (
     <>
-      <p className={estilos.ayuda}>
+      <p className={comun.ayuda}>
         Escribe un mensaje y la app lo toca como melodía, con una{' '}
         <strong>nota por letra</strong> (A = LA3, 220 Hz; B = LA#3…). Sirve para aprender
         qué nota toca cada letra en tu guitarra. El espacio es la cuerda RE al aire
@@ -46,11 +47,11 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
         placeholder="Ej. HOLA"
       />
 
-      <div className={estilos.botones}>
+      <div className={comun.botones}>
         {!tocando ? (
           <button
             type="button"
-            className={estilos.tocar}
+            className={comun.tocar}
             onClick={props.onTocar}
             disabled={mensaje.trim().length === 0}
           >
@@ -63,7 +64,7 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
         )}
       </div>
 
-      <div className={estilos.ajustes}>
+      <div className={comun.controles}>
         <label htmlFor="ajuste-duracion">
           Duración de cada nota al tocar: <strong>{ajustes.duracionNotaMs} ms</strong>
         </label>
@@ -94,7 +95,7 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
         </div>
       )}
 
-      <details className={estilos.tabla}>
+      <details className={comun.desplegable}>
         <summary>Ver notas, signos y espacio (para afinar la guitarra)</summary>
         <TablaNotas />
       </details>

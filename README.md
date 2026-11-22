@@ -147,7 +147,9 @@ src/
 │   ├── frases.ts         # Fraseario esencial (ignora espacios) (+ tests)
 │   └── voz.ts            # Síntesis de voz en español (+ tests)
 ├── components/
-│   └── InstrumentoPanel.tsx # Todo el flujo en un panel (+ test de humo)
+│   ├── InstrumentoPanel.tsx # Panel con pestañas (+ test de humo)
+│   ├── PestanaHablar/Aprender.tsx, Afinador, MedidorSnr, FrasesPropias, AjustesVoz
+│   └── *.module.css      # un módulo por componente + compartido.module.css
 ├── types/ + utils/      # NivelSenal y constantes calibradas
 ```
 

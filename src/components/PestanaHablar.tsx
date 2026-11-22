@@ -17,7 +17,8 @@ import Afinador from './Afinador.tsx';
 import AjustesVoz from './AjustesVoz.tsx';
 import FrasesPropias from './FrasesPropias.tsx';
 import MedidorSnr from './MedidorSnr.tsx';
-import estilos from './InstrumentoPanel.module.css';
+import comun from './compartido.module.css';
+import estilos from './PestanaHablar.module.css';
 
 interface Props {
   escuchando: boolean;
@@ -56,15 +57,15 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
   const { escuchando, texto, fraseDetectada, historial } = props;
   return (
     <>
-      <p className={estilos.ayuda}>
+      <p className={comun.ayuda}>
         Toca con la guitarra, <strong>una nota por letra</strong>, cerca del micrófono: la
         app las escribe y <strong>dice la frase en voz alta</strong>. Está pensada para la
         guitarra: la voz hablada casi no se lee.
       </p>
 
-      <div className={estilos.botones}>
+      <div className={comun.botones}>
         {!escuchando ? (
-          <button type="button" className={estilos.tocar} onClick={props.onEmpezar}>
+          <button type="button" className={comun.tocar} onClick={props.onEmpezar}>
             <MicrophoneIcon aria-hidden="true" weight="fill" /> Escuchar melodía
           </button>
         ) : (
@@ -138,7 +139,7 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
             <button
               key={frase}
               type="button"
-              className={estilos.sugerencia}
+              className={comun.pildora}
               onClick={() => props.onDecir(frase)}
               aria-label={`Decir en voz alta: ${frase}`}
             >
@@ -165,7 +166,7 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
 
       <section className={estilos.frasesRapidas} aria-labelledby="titulo-frases-rapidas">
         <h3 id="titulo-frases-rapidas">Frases rápidas</h3>
-        <p className={estilos.ayuda}>
+        <p className={comun.ayuda}>
           Tócalas con la guitarra, o pulsa una para decirla. Debajo de cada una están sus
           notas.
         </p>
@@ -191,18 +192,19 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
         onQuitar={props.onQuitar}
       />
 
-      <details className={estilos.tabla}>
+      <details className={comun.desplegable}>
         <summary>Historial (lo último que se dijo)</summary>
         {historial.length === 0 ? (
-          <p className={estilos.ayuda}>Todavía no se ha dicho nada.</p>
+          <p className={comun.ayuda}>Todavía no se ha dicho nada.</p>
         ) : (
           <>
-            <ul className={estilos.propias}>
+            <ul className={comun.lista}>
               {historial.map((frase) => (
                 <li key={frase}>
                   <span>{frase}</span>
                   <button
                     type="button"
+                    className={comun.pildora}
                     onClick={() => props.onDecir(frase)}
                     aria-label={`Decir otra vez: ${frase}`}
                   >
@@ -211,8 +213,12 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
                 </li>
               ))}
             </ul>
-            <div className={estilos.nuevaFrase}>
-              <button type="button" onClick={props.onBorrarHistorial}>
+            <div className={estilos.borrarHistorial}>
+              <button
+                type="button"
+                className={comun.pildora}
+                onClick={props.onBorrarHistorial}
+              >
                 Borrar historial
               </button>
             </div>
