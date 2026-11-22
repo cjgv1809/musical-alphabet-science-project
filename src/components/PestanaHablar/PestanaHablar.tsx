@@ -8,16 +8,16 @@ import {
   SpeakerHighIcon,
   StopIcon,
 } from '@phosphor-icons/react';
-import { notasDeFrase } from '../audio/frases.ts';
-import type { LecturaTono } from '../audio/melodia.ts';
-import type { NivelSenal } from '../types/index.ts';
+import { notasDeFrase } from '../../audio/frases.ts';
+import type { LecturaTono } from '../../audio/melodia.ts';
+import type { NivelSenal } from '../../types/index.ts';
 import type { Dispatch, SetStateAction } from 'react';
-import type { Ajustes } from '../utils/ajustes.ts';
-import Afinador from './Afinador.tsx';
-import AjustesVoz from './AjustesVoz.tsx';
-import FrasesPropias from './FrasesPropias.tsx';
-import MedidorSnr from './MedidorSnr.tsx';
-import comun from './compartido.module.css';
+import type { Ajustes } from '../../utils/ajustes.ts';
+import Afinador from '../Afinador/Afinador.tsx';
+import AjustesVoz from '../AjustesVoz/AjustesVoz.tsx';
+import FrasesPropias from '../FrasesPropias/FrasesPropias.tsx';
+import MedidorSnr from '../MedidorSnr/MedidorSnr.tsx';
+import comun from '../compartido/compartido.module.css';
 import estilos from './PestanaHablar.module.css';
 
 interface Props {

@@ -4,7 +4,7 @@ import {
   SIMBOLOS_PUNTUACION,
   obtenerFrecuenciaNota,
   obtenerNombreNota,
-} from '../audio/cromatico.ts';
+} from '../../audio/cromatico.ts';
 
 /** Tabla estática de notas: memoizada, no depende de ningún estado. */
 const TablaNotas = memo(function TablaNotas(): React.JSX.Element {

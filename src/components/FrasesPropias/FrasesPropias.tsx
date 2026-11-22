@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import comun from './compartido.module.css';
+import comun from '../compartido/compartido.module.css';
 import estilos from './FrasesPropias.module.css';
 
 interface Props {

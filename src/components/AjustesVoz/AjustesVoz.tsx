@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
-import { AJUSTES_POR_DEFECTO, LIMITES, type Ajustes } from '../utils/ajustes.ts';
-import comun from './compartido.module.css';
+import { AJUSTES_POR_DEFECTO, LIMITES, type Ajustes } from '../../utils/ajustes.ts';
+import comun from '../compartido/compartido.module.css';
 
 interface Props {
   ajustes: Ajustes;

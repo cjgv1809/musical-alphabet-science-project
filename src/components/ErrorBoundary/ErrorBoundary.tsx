@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { motorEscucha } from '../audio/escucha.ts';
+import { motorEscucha } from '../../audio/escucha.ts';
 
 interface Props {
   children: ReactNode;

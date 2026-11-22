@@ -1,5 +1,5 @@
 import { GuitarIcon } from '@phosphor-icons/react';
-import InstrumentoPanel from './components/InstrumentoPanel.tsx';
+import InstrumentoPanel from './components/InstrumentoPanel/InstrumentoPanel.tsx';
 import estilos from './App.module.css';
 
 /**

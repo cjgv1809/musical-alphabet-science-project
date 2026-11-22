@@ -146,10 +146,12 @@ src/
 │   ├── noiseFilter.ts    # Pasa-banda 100–3000 Hz + SNR en dB
 │   ├── frases.ts         # Fraseario esencial (ignora espacios) (+ tests)
 │   └── voz.ts            # Síntesis de voz en español (+ tests)
-├── components/
-│   ├── InstrumentoPanel.tsx # Panel con pestañas (+ test de humo)
-│   ├── PestanaHablar/Aprender.tsx, Afinador, MedidorSnr, FrasesPropias, AjustesVoz
-│   └── *.module.css      # un módulo por componente + compartido.module.css
+├── components/          # una carpeta por componente (.tsx + .module.css + test)
+│   ├── InstrumentoPanel/ # Panel con pestañas (+ test de humo)
+│   ├── PestanaHablar/, PestanaAprender/, ListaPestanas/
+│   ├── Afinador/, MedidorSnr/, FrasesPropias/, AjustesVoz/, TablaNotas/
+│   ├── ErrorBoundary/    # (+ test)
+│   └── compartido/       # compartido.module.css: estilos usados por varios
 ├── types/ + utils/      # NivelSenal y constantes calibradas
 ```
 

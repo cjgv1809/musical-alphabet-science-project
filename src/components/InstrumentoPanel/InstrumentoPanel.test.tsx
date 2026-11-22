@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import InstrumentoPanel from './InstrumentoPanel.tsx';
-import { motorEscucha, type CallbacksEscucha } from '../audio/escucha.ts';
-import * as voz from '../audio/voz.ts';
+import { motorEscucha, type CallbacksEscucha } from '../../audio/escucha.ts';
+import * as voz from '../../audio/voz.ts';
 
 /**
  * El motor de micrófono se simula: capturamos los callbacks que el panel

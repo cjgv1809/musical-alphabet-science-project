@@ -1,9 +1,9 @@
 import { PlayIcon, StopIcon } from '@phosphor-icons/react';
 import type { Dispatch, SetStateAction } from 'react';
-import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
-import { LIMITES, type Ajustes } from '../utils/ajustes.ts';
-import TablaNotas from './TablaNotas.tsx';
-import comun from './compartido.module.css';
+import { obtenerFrecuenciaNota, obtenerNombreNota } from '../../audio/cromatico.ts';
+import { LIMITES, type Ajustes } from '../../utils/ajustes.ts';
+import TablaNotas from '../TablaNotas/TablaNotas.tsx';
+import comun from '../compartido/compartido.module.css';
 import estilos from './PestanaAprender.module.css';
 
 interface Props {

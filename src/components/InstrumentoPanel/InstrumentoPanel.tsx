@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { FRASES_ESENCIALES, buscarFrase, sugerirFrases } from '../audio/frases.ts';
-import { solicitarDetencionMelodia, tocarMelodia } from '../audio/instrumento.ts';
-import { callar, hayVoz } from '../audio/voz.ts';
-import { useAjustes } from '../hooks/useAjustes.ts';
-import { useAviso } from '../hooks/useAviso.ts';
-import { useEscucha } from '../hooks/useEscucha.ts';
-import { useFrasesPersonalizadas } from '../hooks/useFrasesPersonalizadas.ts';
-import { useHistorial } from '../hooks/useHistorial.ts';
-import { useVoz } from '../hooks/useVoz.ts';
-import { useVocesEspanolas } from '../hooks/useVocesEspanolas.ts';
-import ListaPestanas, { type Pestana } from './ListaPestanas.tsx';
+import { FRASES_ESENCIALES, buscarFrase, sugerirFrases } from '../../audio/frases.ts';
+import { solicitarDetencionMelodia, tocarMelodia } from '../../audio/instrumento.ts';
+import { callar, hayVoz } from '../../audio/voz.ts';
+import { useAjustes } from '../../hooks/useAjustes.ts';
+import { useAviso } from '../../hooks/useAviso.ts';
+import { useEscucha } from '../../hooks/useEscucha.ts';
+import { useFrasesPersonalizadas } from '../../hooks/useFrasesPersonalizadas.ts';
+import { useHistorial } from '../../hooks/useHistorial.ts';
+import { useVoz } from '../../hooks/useVoz.ts';
+import { useVocesEspanolas } from '../../hooks/useVocesEspanolas.ts';
+import ListaPestanas, { type Pestana } from '../ListaPestanas/ListaPestanas.tsx';
 import { BookOpenIcon, GuitarIcon, WarningIcon } from '@phosphor-icons/react';
-import PestanaAprender from './PestanaAprender.tsx';
-import PestanaHablar from './PestanaHablar.tsx';
+import PestanaAprender from '../PestanaAprender/PestanaAprender.tsx';
+import PestanaHablar from '../PestanaHablar/PestanaHablar.tsx';
 import estilos from './InstrumentoPanel.module.css';
 
 /** Silencio (ms) tras la última nota antes de decir la frase en voz alta. */

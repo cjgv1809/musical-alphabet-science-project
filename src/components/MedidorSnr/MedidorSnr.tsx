@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { NivelSenal } from '../types/index.ts';
+import type { NivelSenal } from '../../types/index.ts';
 import estilos from './MedidorSnr.module.css';
 
 /**
