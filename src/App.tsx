@@ -1,3 +1,4 @@
+import { GuitarIcon } from '@phosphor-icons/react';
 import InstrumentoPanel from './components/InstrumentoPanel.tsx';
 import estilos from './App.module.css';
 
@@ -11,7 +12,7 @@ export default function App(): React.JSX.Element {
     <div className={estilos.pagina}>
       <header className={estilos.cabecera}>
         <h1 className={estilos.titulo}>
-          Notas que hablan <span aria-hidden="true">🎸</span>
+          Notas que hablan <GuitarIcon aria-hidden="true" weight="duotone" />
         </h1>
         <p className={estilos.subtitulo}>
           Toca una melodía con la guitarra y la app la convierte en palabras y voz.

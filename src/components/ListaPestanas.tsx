@@ -1,11 +1,11 @@
 import { useRef } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import estilos from './InstrumentoPanel.module.css';
 
 export interface Pestana {
   id: string;
   etiqueta: string;
-  icono: string;
+  icono: ReactNode;
 }
 
 interface Props {
@@ -69,7 +69,8 @@ export default function ListaPestanas({
           onClick={() => onCambiar(p.id)}
           onKeyDown={(e) => alTeclear(e, i)}
         >
-          <span aria-hidden="true">{p.icono}</span> {p.etiqueta}
+          {p.icono}
+          {p.etiqueta}
         </button>
       ))}
     </div>

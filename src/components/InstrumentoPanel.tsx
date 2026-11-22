@@ -10,6 +10,7 @@ import { useHistorial } from '../hooks/useHistorial.ts';
 import { useVoz } from '../hooks/useVoz.ts';
 import { useVocesEspanolas } from '../hooks/useVocesEspanolas.ts';
 import ListaPestanas, { type Pestana } from './ListaPestanas.tsx';
+import { BookOpenIcon, GuitarIcon, WarningIcon } from '@phosphor-icons/react';
 import PestanaAprender from './PestanaAprender.tsx';
 import PestanaHablar from './PestanaHablar.tsx';
 import estilos from './InstrumentoPanel.module.css';
@@ -20,8 +21,8 @@ const RETRASO_FRASE_MS = 1200;
 const MAX_TEXTO = 200;
 
 const PESTANAS: readonly Pestana[] = [
-  { id: 'hablar', etiqueta: 'Tocar y hablar', icono: '🎸' },
-  { id: 'aprender', etiqueta: 'Aprender', icono: '📖' },
+  { id: 'hablar', etiqueta: 'Tocar y hablar', icono: <GuitarIcon aria-hidden="true" /> },
+  { id: 'aprender', etiqueta: 'Aprender', icono: <BookOpenIcon aria-hidden="true" /> },
 ];
 
 /**
@@ -201,7 +202,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
       {errorLocal !== null && (
         <p className={estilos.error} role="alert">
-          <span aria-hidden="true">⚠</span> {errorLocal}
+          <WarningIcon aria-hidden="true" /> {errorLocal}
         </p>
       )}
 

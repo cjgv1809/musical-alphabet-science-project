@@ -1,3 +1,13 @@
+import {
+  BackspaceIcon,
+  CheckCircleIcon,
+  CopyIcon,
+  GuitarIcon,
+  MicrophoneIcon,
+  ShareNetworkIcon,
+  SpeakerHighIcon,
+  StopIcon,
+} from '@phosphor-icons/react';
 import { notasDeFrase } from '../audio/frases.ts';
 import type { LecturaTono } from '../audio/melodia.ts';
 import type { NivelSenal } from '../types/index.ts';
@@ -55,11 +65,11 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
       <div className={estilos.botones}>
         {!escuchando ? (
           <button type="button" className={estilos.tocar} onClick={props.onEmpezar}>
-            <span aria-hidden="true">●</span> Escuchar melodía
+            <MicrophoneIcon aria-hidden="true" weight="fill" /> Escuchar melodía
           </button>
         ) : (
           <button type="button" onClick={props.onDetener}>
-            <span aria-hidden="true">■</span> Dejar de escuchar
+            <StopIcon aria-hidden="true" weight="fill" /> Dejar de escuchar
           </button>
         )}
         <button
@@ -68,7 +78,7 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
           disabled={texto.length === 0}
           aria-label="Leer en voz alta el texto transcrito"
         >
-          <span aria-hidden="true">🔊</span> Decir en voz alta
+          <SpeakerHighIcon aria-hidden="true" /> Decir en voz alta
         </button>
         {/* Siempre montados: así el espacio está reservado y nada se mueve al
             aparecer el primer texto. Ocultos (visibility) no reciben foco ni se leen. */}
@@ -76,11 +86,11 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
           className={`${estilos.accionesTexto} ${texto.length === 0 ? estilos.oculto : ''}`}
         >
           <button type="button" onClick={props.onCopiar}>
-            <span aria-hidden="true">📋</span> Copiar
+            <CopyIcon aria-hidden="true" /> Copiar
           </button>
           {typeof navigator.share === 'function' && (
             <button type="button" onClick={props.onCompartir}>
-              <span aria-hidden="true">↗</span> Compartir
+              <ShareNetworkIcon aria-hidden="true" /> Compartir
             </button>
           )}
           <button
@@ -88,7 +98,7 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
             onClick={props.onBorrarUltima}
             aria-label="Borrar la última letra"
           >
-            <span aria-hidden="true">⌫</span> Borrar
+            <BackspaceIcon aria-hidden="true" /> Borrar
           </button>
           <button type="button" onClick={props.onLimpiar}>
             Limpiar
@@ -140,15 +150,15 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
 
       {fraseDetectada !== null && (
         <p className={estilos.fraseReconocida} role="status">
-          <span aria-hidden="true">✅</span> Frase reconocida:{' '}
+          <CheckCircleIcon aria-hidden="true" weight="fill" /> Frase reconocida:{' '}
           <strong>{fraseDetectada}</strong>
         </p>
       )}
 
       {props.confuso && fraseDetectada === null && (
         <p className={estilos.aviso} role="status">
-          <span aria-hidden="true">🎸</span> Se oye sonido pero ninguna nota clara: toca
-          de a <strong>una sola cuerda</strong> por vez, despacio y cerca del micro. Los
+          <GuitarIcon aria-hidden="true" /> Se oye sonido pero ninguna nota clara: toca de
+          a <strong>una sola cuerda</strong> por vez, despacio y cerca del micro. Los
           acordes rasgueados no se leen (suenan varias notas a la vez).
         </p>
       )}

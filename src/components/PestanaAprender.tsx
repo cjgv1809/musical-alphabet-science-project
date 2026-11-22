@@ -1,3 +1,4 @@
+import { PlayIcon, StopIcon } from '@phosphor-icons/react';
 import type { Dispatch, SetStateAction } from 'react';
 import { obtenerFrecuenciaNota, obtenerNombreNota } from '../audio/cromatico.ts';
 import { LIMITES, type Ajustes } from '../utils/ajustes.ts';
@@ -53,11 +54,11 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
             onClick={props.onTocar}
             disabled={mensaje.trim().length === 0}
           >
-            <span aria-hidden="true">▶</span> Tocar melodía
+            <PlayIcon aria-hidden="true" weight="fill" /> Tocar melodía
           </button>
         ) : (
           <button type="button" onClick={props.onDetenerMelodia}>
-            <span aria-hidden="true">■</span> Detener
+            <StopIcon aria-hidden="true" weight="fill" /> Detener
           </button>
         )}
       </div>
