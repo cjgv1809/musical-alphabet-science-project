@@ -33,6 +33,8 @@
   --accent-table: #7d6115;
   --accent-edu: #6f4fa1;
   --accent-inst: #9a5518;
+  /* Marrón como TEXTO/trazo sobre fondo de tarjeta (≥4.5:1 en cada tema). */
+  --accent-inst-text: #8a4a12;
 
   --warn-bg: #fff4cf;
   --warn-border: #8a6d1a;
@@ -50,6 +52,7 @@
     --card: #151c30;
     --border: #5f6f99; /* ≥3:1 sobre card/field (WCAG 1.4.11) */
     --field: #1c2440;
+    --accent-inst-text: #e8aa6c;
     --warn-bg: #3a2f10;
     --danger-bg: #3d1512;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);

@@ -184,9 +184,7 @@ export default function InstrumentoPanel(): React.JSX.Element {
 
   return (
     <section className={estilos.panel} aria-labelledby="titulo-instrumento">
-      <h2 id="titulo-instrumento">
-        De la guitarra a las palabras <span aria-hidden="true">🎸</span>
-      </h2>
+      <h2 id="titulo-instrumento">De la guitarra a las palabras</h2>
 
       <ListaPestanas
         pestanas={PESTANAS}

@@ -4,9 +4,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
-  box-shadow:
-    var(--shadow),
-    inset 0 4px 0 var(--accent);
+  box-shadow: var(--shadow);
 }
 
 .ayuda {
@@ -47,6 +45,9 @@
 }
 
 .botones button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   min-height: 44px;
   font-size: 1rem;
   padding: 0.55rem 1.1rem;
@@ -162,6 +163,26 @@
   min-height: 44px;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+}
+
+.tabla summary::-webkit-details-marker {
+  display: none;
+}
+
+.tabla summary::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid var(--accent-inst-text);
+  border-bottom: 2px solid var(--accent-inst-text);
+  transform: rotate(-45deg);
+  transition: transform 150ms ease;
+}
+
+.tabla[open] > summary::before {
+  transform: rotate(45deg);
 }
 
 .tabla table {
@@ -181,7 +202,7 @@
 .fraseReconocida {
   margin-top: 0.8rem;
   /* La frase es el mensaje de la app: debe leerse a distancia. */
-  font-size: clamp(1.6rem, 7vw, 3rem);
+  font-size: clamp(1rem, 4vw, 1.2rem);
   line-height: 1.2;
   text-align: center;
   overflow-wrap: anywhere;
@@ -215,10 +236,24 @@
   font-weight: 800;
   padding: 0.5rem 0.7rem;
   border-radius: var(--radius-sm);
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--border);
   background: var(--field);
   color: var(--ink);
   cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+@media (hover: hover) {
+  .fraseBtn:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+}
+
+.fraseBtn:active {
+  transform: scale(0.98);
 }
 
 .fraseBtn small {
@@ -325,8 +360,9 @@
 }
 
 .ajustes input[type='range'] {
+  accent-color: var(--accent-inst);
   width: 100%;
-  min-height: 44px;
+  min-height: 32px;
 }
 
 .ajustes select,
@@ -418,7 +454,7 @@
 /* Confirmación breve (copiado). Reserva su alto para no mover el layout. */
 .exito {
   min-height: 1.5rem;
-  margin: 0.4rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.95rem;
   color: var(--accent-listen);
   font-weight: 700;
@@ -433,10 +469,14 @@
 }
 
 .pestana {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   flex: 1;
   min-height: 48px;
-  padding: 0.5rem 0.9rem;
-  font-size: 1.05rem;
+  padding: 0.5rem 0.5rem;
+  font-size: clamp(0.95rem, 4vw, 1.05rem);
   font-weight: 700;
   color: var(--ink);
   background: transparent;
@@ -451,7 +491,7 @@
   background: var(--card);
   border-color: var(--border);
   border-bottom: 2px solid var(--card);
-  color: var(--accent);
+  color: var(--accent-inst-text);
 }
 
 /* La transcripción ocupa todo el ancho; la nota que suena va en "Aprender". */
@@ -470,4 +510,39 @@
 .frasesRapidas h3 {
   margin: 0 0 0.2rem;
   font-size: 1rem;
+}
+
+/* Selección de texto con la marca. */
+::selection {
+  background: color-mix(in srgb, var(--accent-inst) 30%, transparent);
+}
+
+/* Iconos (Phosphor): heredan el color del texto y escalan con él. */
+.botones svg,
+.pestana svg,
+.fraseReconocida svg,
+.aviso svg,
+.error svg {
+  flex-shrink: 0;
+  font-size: 1.15em;
+}
+
+.fraseReconocida strong {
+  display: block;
+  font-size: clamp(2.2rem, 11vw, 3.6rem);
+  line-height: 1.1;
+}
+
+.fraseReconocida svg {
+  vertical-align: -0.12em;
+  color: var(--accent-listen);
+}
+
+/* Acciones sobre el texto: reservan su espacio aunque aún no haya texto. */
+.accionesTexto {
+  display: contents;
+}
+
+.oculto {
+  visibility: hidden;
 }

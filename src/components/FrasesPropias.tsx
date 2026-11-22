@@ -22,9 +22,12 @@ export default function FrasesPropias({
 
   return (
     <details className={estilos.tabla}>
-      <summary>Mis frases propias (nombre, medicación…)</summary>
+      <summary>Mis frases propias</summary>
       <div className={estilos.nuevaFrase}>
         <label htmlFor="nueva-frase">Añadir una frase propia</label>
+        <p className={estilos.ayuda}>
+          Por ejemplo tu nombre o tu medicación. Aparecerán entre las frases rápidas.
+        </p>
         <div className={estilos.nuevaFraseFila}>
           <input
             id="nueva-frase"

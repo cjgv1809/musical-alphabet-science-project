@@ -48,8 +48,8 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
     <>
       <p className={estilos.ayuda}>
         Toca con la guitarra, <strong>una nota por letra</strong>, cerca del micrófono: la
-        app las escribe y <strong>dice la frase en voz alta</strong>. Solo escucha la
-        guitarra; las voces se ignoran.
+        app las escribe y <strong>dice la frase en voz alta</strong>. Está pensada para la
+        guitarra: la voz hablada casi no se lee.
       </p>
 
       <div className={estilos.botones}>
@@ -68,27 +68,32 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
           disabled={texto.length === 0}
           aria-label="Leer en voz alta el texto transcrito"
         >
-          <span aria-hidden="true">🔊</span> Hablar
+          <span aria-hidden="true">🔊</span> Decir en voz alta
         </button>
-        <button type="button" onClick={props.onCopiar} disabled={texto.length === 0}>
-          <span aria-hidden="true">📋</span> Copiar
-        </button>
-        {typeof navigator.share === 'function' && (
-          <button type="button" onClick={props.onCompartir} disabled={texto.length === 0}>
-            <span aria-hidden="true">↗</span> Compartir
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={props.onBorrarUltima}
-          disabled={texto.length === 0}
-          aria-label="Borrar la última letra"
+        {/* Siempre montados: así el espacio está reservado y nada se mueve al
+            aparecer el primer texto. Ocultos (visibility) no reciben foco ni se leen. */}
+        <div
+          className={`${estilos.accionesTexto} ${texto.length === 0 ? estilos.oculto : ''}`}
         >
-          <span aria-hidden="true">⌫</span> Borrar
-        </button>
-        <button type="button" onClick={props.onLimpiar} disabled={texto.length === 0}>
-          Limpiar
-        </button>
+          <button type="button" onClick={props.onCopiar}>
+            <span aria-hidden="true">📋</span> Copiar
+          </button>
+          {typeof navigator.share === 'function' && (
+            <button type="button" onClick={props.onCompartir}>
+              <span aria-hidden="true">↗</span> Compartir
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={props.onBorrarUltima}
+            aria-label="Borrar la última letra"
+          >
+            <span aria-hidden="true">⌫</span> Borrar
+          </button>
+          <button type="button" onClick={props.onLimpiar}>
+            Limpiar
+          </button>
+        </div>
       </div>
 
       <p className={estilos.exito} role="status">
@@ -151,8 +156,8 @@ export default function PestanaHablar(props: Props): React.JSX.Element {
       <section className={estilos.frasesRapidas} aria-labelledby="titulo-frases-rapidas">
         <h3 id="titulo-frases-rapidas">Frases rápidas</h3>
         <p className={estilos.ayuda}>
-          Tócalas o deletréalas con la guitarra, o pulsa una para decirla. Debajo de cada
-          una están sus notas.
+          Tócalas con la guitarra, o pulsa una para decirla. Debajo de cada una están sus
+          notas.
         </p>
         <div className={estilos.frasesGrid}>
           {props.frases.map((frase) => (

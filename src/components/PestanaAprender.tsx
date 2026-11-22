@@ -25,10 +25,10 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
   return (
     <>
       <p className={estilos.ayuda}>
-        Una <strong>nota musical por letra</strong> (A = LA3 220 Hz, B = LA#3…): toca la
-        melodía aquí o con una guitarra afinada, de una cuerda cada vez. Si completas una
-        frase esencial, la app la dice en voz alta. Espacio = cuerda RE al aire (146.83
-        Hz).
+        Escribe un mensaje y la app lo toca como melodía, con una{' '}
+        <strong>nota por letra</strong> (A = LA3, 220 Hz; B = LA#3…). Sirve para aprender
+        qué nota toca cada letra en tu guitarra. El espacio es la cuerda RE al aire
+        (146,83 Hz).
       </p>
 
       <label className={estilos.etiqueta} htmlFor="campo-melodia">
@@ -79,21 +79,19 @@ export default function PestanaAprender(props: Props): React.JSX.Element {
         />
       </div>
 
-      <div className={estilos.ahoraSuenaFila}>
-        <div className={estilos.ahoraSuena}>
-          {notaActual === null ? (
-            <span className={estilos.apagado}>—</span>
-          ) : (
+      {notaActual !== null && (
+        <div className={estilos.ahoraSuenaFila} role="status" aria-label="Nota que suena">
+          <div className={estilos.ahoraSuena}>
             <span className={estilos.nota}>
               {notaActual === ' ' ? '␣ ESPACIO' : notaActual}
               <small>
                 {' '}
-                {`(${obtenerNombreNota(notaActual) ?? ''} · ${obtenerFrecuenciaNota(notaActual) ?? ''} Hz)`}
+                {`(${obtenerNombreNota(notaActual) ?? ''}, ${String(obtenerFrecuenciaNota(notaActual) ?? '').replace('.', ',')} Hz)`}
               </small>
             </span>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <details className={estilos.tabla}>
         <summary>Ver notas, signos y espacio (para afinar la guitarra)</summary>

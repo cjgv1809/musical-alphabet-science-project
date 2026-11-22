@@ -25,7 +25,7 @@ export default function MedidorSnr({
 
   return (
     <p className={estilos.snr}>
-      Señal/ruido: <strong>{snrDb} dB</strong>
+      Calidad de la señal: <strong>{snrDb} dB</strong>
     </p>
   );
 }

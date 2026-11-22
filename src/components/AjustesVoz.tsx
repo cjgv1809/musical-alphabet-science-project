@@ -16,10 +16,11 @@ export default function AjustesVoz({
 }: Props): React.JSX.Element {
   return (
     <details className={estilos.tabla}>
-      <summary>Ajustes de voz (velocidad y voz)</summary>
+      <summary>Ajustes de voz</summary>
       <div className={estilos.ajustes}>
         <label htmlFor="ajuste-velocidad-voz">
-          Velocidad de la voz: <strong>{ajustes.velocidadVoz.toFixed(2)}×</strong>
+          Velocidad de la voz:{' '}
+          <strong>{ajustes.velocidadVoz.toFixed(2).replace('.', ',')}×</strong>
         </label>
         <input
           id="ajuste-velocidad-voz"
