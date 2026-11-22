@@ -71,6 +71,17 @@ describe('voz (elección de voz española)', () => {
     ).toEqual(['TE QUIERO']);
   });
 
+  it('reconoce ESTOY CANSADO aunque la guitarra no emita el espacio', () => {
+    expect(buscarFrase('ESTOYCANSADO')).toBe('ESTOY CANSADO');
+    expect(textoParaVoz('ESTOY CANSADO')).toBe('estoy cansado');
+    expect(
+      sugerirFrases(
+        'ESTOYC',
+        FRASES_ESENCIALES.map((f) => f.texto),
+      ),
+    ).toEqual(['ESTOY CANSADO']);
+  });
+
   it('reconoce también las frases personalizadas', () => {
     expect(buscarFrase('MARIA', ['María'])).toBe('María');
     expect(buscarFrase('MARIA')).toBeNull();

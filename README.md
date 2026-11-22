@@ -26,7 +26,7 @@ en voz alta**.
 npm install
 npm run dev      # desarrollo (abre http://localhost:5173)
 npm run dev:lan  # desarrollo + HTTPS en tu red WiFi (para el móvil, ver abajo)
-npm run test     # tests unitarios (Vitest, 50 tests)
+npm run test     # tests unitarios (Vitest, 56 tests)
 npm run test:e2e # E2E (Playwright + micrófono falso; 1.ª vez: npx playwright install chromium)
 npm run typecheck # TypeScript estricto
 npm run lint      # ESLint (React hooks + accesibilidad JSX)
@@ -46,7 +46,8 @@ npm run build    # compilación de producción
    pulsada mantiene el tono casi fijo (tararear una nota perfectamente
    fija sí podría colarse).
 3. **Frases que hablan** 🔊: al deletrear una frase esencial (HOLA, SÍ, NO,
-   GRACIAS, POR FAVOR, AGUA, AYUDA, BAÑO, ME DUELE, ADIÓS, TE QUIERO) aparece en
+   GRACIAS, POR FAVOR, AGUA, AYUDA, BAÑO, ME DUELE, ADIÓS, TE QUIERO, ESTOY
+   CANSADO) aparece en
    grande y suena en voz alta. El botón 🔊 Hablar lee cualquier texto, y
    la parrilla de frases las dice al pulsarlas (cada una muestra sus
    notas para aprenderla). La guitarra no emite espacios: "MEDUELE" vale

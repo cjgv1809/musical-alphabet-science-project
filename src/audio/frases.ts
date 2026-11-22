@@ -27,6 +27,7 @@ export const FRASES_ESENCIALES: readonly FraseEsencial[] = [
   { texto: 'ME DUELE' },
   { texto: 'ADIÓS' },
   { texto: 'TE QUIERO' },
+  { texto: 'ESTOY CANSADO' },
 ] as const;
 
 /** Normaliza para comparar: mayúsculas y sin espacios ni tildes. */
